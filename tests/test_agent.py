@@ -106,3 +106,33 @@ def test_old_tool_results_are_stubbed():
     assert out[1]["content"] == agent.OLD_RESULT_STUB
     assert out[4]["content"] == "CURRENT PAGE"
     assert all("activity" not in m for m in out)  # UI-only fields never reach the model
+
+
+# -- system prompt handling ---------------------------------------------------
+
+def test_with_system_native():
+    out = agent.with_system("Be brief.", [{"role": "user", "content": "hi"}], supported=True)
+    assert out[0] == {"role": "system", "content": "Be brief."}
+
+
+def test_mid_conversation_system_notes_become_user_notes():
+    # Many templates raise "System message must be at the beginning".
+    history = [{"role": "user", "content": "hi"}, {"role": "system", "content": "save it now"}]
+    out = agent.with_system("Be brief.", history, supported=True)
+    assert [m["role"] for m in out] == ["system", "user", "user"]
+    assert out[2]["content"] == "[Note from the app] save it now"
+
+
+def test_with_system_folds_into_first_user_message():
+    history = [
+        {"role": "user", "content": "hi"},
+        {"role": "assistant", "content": "hello"},
+        {"role": "system", "content": "save it now"},
+        {"role": "user", "content": "again"},
+    ]
+    out = agent.with_system("Be brief.", history, supported=False)
+    assert all(m["role"] != "system" for m in out)
+    assert out[0]["content"].startswith("[Instructions") and "Be brief." in out[0]["content"]
+    assert out[2]["role"] == "user" and out[2]["content"].startswith("[Note from the app]")
+    assert out[3]["content"] == "again"  # only the first user message carries the instructions
+    assert history[0]["content"] == "hi"  # stored history is never modified

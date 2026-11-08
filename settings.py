@@ -15,7 +15,10 @@ DEFAULTS = {
     "library_path": str(Path.home() / "Ollama Library"),
     "tools_default": True,  # library tools on for new chats
     "custom_models": [],  # Hugging Face models the user added (hf.co/user/repo:quant)
+    "instructions": "",  # the user's standing system prompt (style, tone, preferences)
 }
+
+MAX_INSTRUCTIONS = 4000  # characters
 
 
 def load() -> dict:

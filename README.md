@@ -11,6 +11,8 @@ It's a learning/portfolio project. The interesting part isn't the chat window; i
 - **GPU-aware model picker**: detects your graphics card, recommends a model that fits, downloads models with a progress bar, and shows whether the loaded model runs 100% on the GPU.
 - **Hugging Face models**: add any GGUF model with `hf.co/<user>/<repo>[:<quant>]`.
 - **"Save as draft" on every reply**, so saving never depends on the model getting a tool call right.
+- **Standing instructions** (⚙ Instructions): your own system prompt for tone, style and preferences.
+- **Reads each model's chat template** (from the GGUF file) to see what it supports. Models without tool calling can't turn on library tools. For models whose template has no system role, instructions are folded into the first message, because Ollama would otherwise drop them silently.
 - A terminal chatbot (`chat.py`) too.
 
 ## Security model

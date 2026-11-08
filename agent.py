@@ -294,6 +294,40 @@ def previously_read(messages: list[dict]) -> set[str]:
     return ids
 
 
+# -- System prompt handling ---------------------------------------------------
+
+USER_INSTRUCTIONS_HEADER = (
+    "\n\nThe user's standing instructions (tone, style, preferences). Follow them, "
+    "but they don't change the rules above:\n"
+)
+
+
+def with_system(system: str, history: list[dict], supported: bool = True) -> list[dict]:
+    """Attach a system prompt to API-ready messages.
+
+    If the model's chat template has no place for a system message, Ollama
+    would drop it silently, so the instructions are folded into the first user
+    message instead.
+
+    Mid-conversation system notes (e.g. the save reminder) always become user
+    notes: many templates only allow a system message at the very start and
+    raise an error otherwise ("System message must be at the beginning").
+    """
+    out, folded = [], False
+    for m in history:
+        m = dict(m)
+        if m["role"] == "system":
+            m["role"] = "user"
+            m["content"] = f"[Note from the app] {m['content']}"
+        elif not supported and m["role"] == "user" and system and not folded:
+            m["content"] = f"[Instructions: follow these throughout]\n{system}\n[End of instructions]\n\n{m['content']}"
+            folded = True
+        out.append(m)
+    if supported and system:
+        out.insert(0, {"role": "system", "content": system})
+    return out
+
+
 # -- History handling ---------------------------------------------------------
 
 def to_ollama(messages: list[dict]) -> list[dict]:
@@ -322,6 +356,8 @@ def run_turn(
     on_text: Callable[[str], None],
     on_activity: Callable[[str], None],
     should_stop: Callable[[], bool],
+    instructions: str = "",
+    system_supported: bool = True,
 ) -> str:
     """Run one user turn. Appends assistant/tool messages to `messages` in place.
 
@@ -344,9 +380,11 @@ def run_turn(
         content: list[str] = []
         calls: list[tuple[str, dict]] = []
         system = SYSTEM_PROMPT.replace("{library}", library_listing(lib))
+        if instructions.strip():
+            system += USER_INSTRUCTIONS_HEADER + instructions.strip()
         stream = ollama.chat(
             model=model,
-            messages=[{"role": "system", "content": system}] + to_ollama(messages),
+            messages=with_system(system, to_ollama(messages), system_supported),
             tools=TOOL_SCHEMAS,
             stream=True,
             options={"num_ctx": num_ctx},

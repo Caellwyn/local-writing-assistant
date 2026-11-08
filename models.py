@@ -130,6 +130,43 @@ def supports_tools(tag: str) -> bool:
         return False
 
 
+def template_supports_system(template: str) -> bool:
+    """Does a chat template place a system message anywhere?
+
+    Works for Ollama's Go templates ({{ .System }}, eq .Role "system") and for
+    Jinja templates taken from GGUF files (messages[0].role == 'system').
+    Templates that raise an error for a system role, or never mention it,
+    count as unsupported: Ollama would drop the system message silently.
+    Templates that fold the system text into the first user turn (Gemma)
+    count as supported, because the text still reaches the model.
+    """
+    low = (template or "").lower()
+    # Only errors that reject the system role itself count. Templates also raise
+    # for narrower things ("System message cannot contain images", "System
+    # message must be at the beginning") while supporting system prompts fine.
+    if _REJECTS_SYSTEM.search(low):
+        return False
+    return ".system" in low or bool(re.search(r"""['"]system['"]""", low))
+
+
+_REJECTS_SYSTEM = re.compile(
+    r"""raise_exception\(\s*['"][^'"]*system[^'"]*(not supported|unsupported|not allowed|is not permitted)[^'"]*['"]"""
+)
+
+
+@lru_cache(maxsize=64)
+def template_info(tag: str) -> dict:
+    """{'system': bool, 'tools': bool} for a downloaded model, read from its chat template."""
+    try:
+        info = ollama.show(tag)
+    except Exception:
+        return {"system": True, "tools": False}
+    return {
+        "system": template_supports_system(info.template or ""),
+        "tools": "tools" in (info.capabilities or []),
+    }
+
+
 def installed_sizes() -> dict[str, float]:
     """Downloaded models and their size in GB."""
     try:
@@ -180,6 +217,7 @@ def hf_label(tag: str) -> str:
 def delete(tag: str) -> None:
     ollama.delete(tag)
     capabilities.cache_clear()
+    template_info.cache_clear()
 
 
 def pull(tag: str, on_progress: Callable[[str, int, int], None]) -> None:

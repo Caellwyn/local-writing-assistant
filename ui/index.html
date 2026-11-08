@@ -142,7 +142,21 @@
     display: none; padding: 12px 20px; border-bottom: 1px solid var(--border);
     background: var(--panel); font-size: 13px;
   }
-  #hf-form.open { display: block; }
+  #hf-form.open, #instr-form.open { display: block; }
+  #instr-form {
+    display: none; padding: 12px 20px; border-bottom: 1px solid var(--border);
+    background: var(--panel); font-size: 13px;
+  }
+  #instr-text {
+    width: 100%; min-height: 90px; resize: vertical; font: inherit; font-size: 14px;
+    color: var(--text); background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 8px 10px; outline: none;
+  }
+  #instr-text:focus { border-color: var(--accent); }
+  #instr-form .line { display: flex; gap: 8px; align-items: center; margin-top: 6px; }
+  #instr-note { flex: 1; color: var(--muted); }
+  #instr-note.warn { color: var(--warn); }
+  .hint label.disabled { color: var(--muted); cursor: not-allowed; }
   #hf-form .line { display: flex; gap: 8px; align-items: center; }
   #hf-ref {
     flex: 1; font: inherit; font-size: 14px; color: var(--text); background: var(--bg);
@@ -292,7 +306,17 @@
       <select id="model" title="Model"></select>
       <span id="fit"></span>
       <button class="link" id="remove-model" style="display:none">Remove this model</button>
+      <button class="link" id="instr-open" title="Standing instructions (system prompt)">⚙ Instructions</button>
       <div id="pull"><span id="pull-text"></span><div class="bar"><div></div></div></div>
+    </div>
+    <div id="instr-form">
+      <textarea id="instr-text" placeholder="Standing instructions for every chat, e.g. “Write in British English. Keep a warm, plain tone. Never use em dashes.”"></textarea>
+      <div class="line">
+        <span id="instr-note"></span>
+        <span id="instr-count" style="color: var(--muted)"></span>
+        <button class="small-btn" id="instr-save">Save</button>
+        <button class="icon-btn" id="instr-cancel" title="Close">✕</button>
+      </div>
     </div>
     <div id="hf-form">
       <div class="line">
@@ -432,8 +456,9 @@
     sendBtn.textContent = b ? "Stop" : "Send";
     sendBtn.classList.toggle("stop", b);
     $("#model").disabled = b;
-    $("#tools").disabled = b;
+    $("#tools").disabled = b || noToolsModel;
   }
+  let noToolsModel = false;
 
   // ---------- threads ----------
   async function refreshThreads() {
@@ -570,6 +595,16 @@
     sel.value = models.current;
     const curModel = models.models.find((m) => m.tag === models.current);
     $("#remove-model").style.display = curModel && curModel.custom ? "" : "none";
+    // Library tools need a model whose chat template supports tool calling.
+    const noTools = !!curModel && curModel.tools === false;
+    noToolsModel = noTools;
+    $("#tools").disabled = noTools || busy;
+    const toolsLabel = $("#tools").closest("label");
+    toolsLabel.classList.toggle("disabled", noTools);
+    toolsLabel.title = noTools
+      ? `${curModel.label} wasn't trained for tool calling (its chat template has no tool support), so it can't use the library.`
+      : "Let the assistant read your library and save drafts";
+    if ($("#instr-form").classList.contains("open")) loadInstructions();
     const g = models.gpu;
     $("#meta").textContent = g.backend === "CPU" ? "No supported GPU · running on CPU" : `${g.name.replace(/^NVIDIA GeForce |^AMD /, "")} · ${g.vram_gb} GB`;
     const cur = models.models.find((m) => m.tag === models.current);
@@ -602,6 +637,38 @@
     if (r.error) return banner(r.error);
     await refreshModels();
     if ($("#welcome")) showWelcome();
+  };
+
+  async function loadInstructions() {
+    const r = await api.get_instructions();
+    const ta = $("#instr-text");
+    if (document.activeElement !== ta) ta.value = r.text;
+    ta.maxLength = r.max;
+    const note = $("#instr-note");
+    if (r.system === false) {
+      note.textContent = "⚠ This model's chat template has no system prompt. Your instructions will be added to the start of each chat's first message instead.";
+      note.className = "warn";
+    } else {
+      note.textContent = r.system ? "Sent as the system prompt for every chat (library chats add them after the assistant's built-in rules)." : "";
+      note.className = "";
+    }
+    updateCount();
+  }
+  function updateCount() {
+    const ta = $("#instr-text");
+    $("#instr-count").textContent = `${ta.value.length.toLocaleString()} / ${ta.maxLength.toLocaleString()}`;
+  }
+  $("#instr-text").addEventListener("input", updateCount);
+  $("#instr-open").onclick = async () => {
+    const f = $("#instr-form");
+    if (f.classList.toggle("open")) { await loadInstructions(); $("#instr-text").focus(); }
+  };
+  $("#instr-cancel").onclick = () => $("#instr-form").classList.remove("open");
+  $("#instr-save").onclick = async () => {
+    const r = await api.set_instructions($("#instr-text").value);
+    if (r.error) return banner(r.error);
+    $("#instr-form").classList.remove("open");
+    banner(r.text ? "Instructions saved. They apply from your next message." : "Instructions cleared.", { info: true });
   };
 
   async function addHF() {

@@ -238,6 +238,10 @@ class Api:
                 "blurb": f"Added from Hugging Face: {tag}",
                 "license": "see the model's Hugging Face page",
             })
+        for i in items:  # what each downloaded model's chat template supports
+            if i["installed"]:
+                support = models.template_info(i["tag"])
+                i["system"], i["tools"] = support["system"], support["tools"]
         if not any(i["tag"] == self._model for i in items):  # e.g. forced with OLLAMA_MODEL
             items.append({
                 "tag": self._model, "label": self._model, "size_gb": sizes.get(self._model),
@@ -246,6 +250,23 @@ class Api:
                 "blurb": "Set with OLLAMA_MODEL", "license": "",
             })
         return {"models": items, "current": self._model, "pulling": self._pulling, "gpu": self._gpu}
+
+    def model_support(self) -> dict:
+        """What the current model's chat template supports: {'system': bool, 'tools': bool}."""
+        if self._model not in models.installed():
+            return {"model": self._model, "system": None, "tools": None}
+        return {"model": self._model, **models.template_info(self._model)}
+
+    def get_instructions(self) -> dict:
+        return {"text": self._cfg["instructions"], "max": settings.MAX_INSTRUCTIONS, **self.model_support()}
+
+    def set_instructions(self, text: str) -> dict:
+        text = str(text or "").strip()
+        if len(text) > settings.MAX_INSTRUCTIONS:
+            return {"error": f"Instructions are limited to {settings.MAX_INSTRUCTIONS:,} characters."}
+        self._cfg["instructions"] = text
+        settings.save(self._cfg)
+        return self.get_instructions()
 
     def add_hf_model(self, ref: str) -> dict:
         """Add a GGUF model from Hugging Face (validated) and start downloading it."""
@@ -532,7 +553,9 @@ class Api:
         try:
             if thread.get("tools") and self._lib:
                 status = agent.run_turn(
-                    self._lib, thread["messages"], model, self._num_ctx, on_text, on_activity, self._stop.is_set
+                    self._lib, thread["messages"], model, self._num_ctx, on_text, on_activity, self._stop.is_set,
+                    instructions=self._cfg["instructions"],
+                    system_supported=models.template_info(model)["system"],
                 )
             else:
                 status = self._plain_chat(thread, model, on_text)
@@ -561,7 +584,8 @@ class Api:
 
     def _plain_chat(self, thread: dict, model: str, on_text) -> str:
         reply: list[str] = []
-        msgs = [{"role": "system", "content": CHAT_PROMPT}] + agent.to_ollama(thread["messages"])
+        system = self._cfg["instructions"].strip() or CHAT_PROMPT
+        msgs = agent.with_system(system, agent.to_ollama(thread["messages"]), models.template_info(model)["system"])
         stream = ollama.chat(
             model=model, messages=msgs, stream=True, options={"num_ctx": self._num_ctx}, **models.chat_options(model)
         )
