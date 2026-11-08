@@ -1,0 +1,12 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Personal data: chats, settings, logs
+threads/
+settings.json
+settings.json.bak
+app.log
+*.tmp

@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ollama Chat</title>
+<style>
+  :root {
+    --bg: #f7f7f8;
+    --panel: #ffffff;
+    --sidebar: #eeeef1;
+    --text: #1d1d22;
+    --muted: #6b6b76;
+    --border: #dcdce2;
+    --accent: #3b6cf6;
+    --accent-text: #ffffff;
+    --user-bg: #e4ebff;
+    --code-bg: #f0f0f3;
+    --hover: #e2e2e8;
+    --danger: #c43c3c;
+    --warn: #b7791f;
+    --ok: #2f855a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1b1b1f;
+      --panel: #232328;
+      --sidebar: #16161a;
+      --text: #e8e8ed;
+      --muted: #9a9aa6;
+      --border: #34343c;
+      --accent: #6b8cff;
+      --accent-text: #0e0e12;
+      --user-bg: #2c3350;
+      --code-bg: #18181c;
+      --hover: #2a2a31;
+      --danger: #ef6b6b;
+      --warn: #e0b04f;
+      --ok: #5fcf8f;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 15px/1.55 "Segoe UI", system-ui, sans-serif;
+    display: flex;
+    overflow: hidden;
+  }
+  button { font: inherit; color: inherit; }
+
+  /* ---------- Sidebar ---------- */
+  #sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  #tabs { display: flex; gap: 4px; padding: 12px 12px 0; }
+  .tab {
+    flex: 1; padding: 7px 0; border: none; border-radius: 8px 8px 0 0;
+    background: none; color: var(--muted); cursor: pointer; font-weight: 600;
+    border-bottom: 2px solid transparent;
+  }
+  .tab.active { color: var(--text); border-bottom-color: var(--accent); }
+  .pane { display: none; flex: 1; flex-direction: column; min-height: 0; }
+  .pane.active { display: flex; }
+  .side-btn {
+    margin: 12px 12px 6px;
+    padding: 9px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel);
+    text-align: left;
+    cursor: pointer;
+  }
+  .side-btn:hover { background: var(--hover); }
+  .list { flex: 1; overflow-y: auto; padding: 0 8px 12px; }
+  .row {
+    display: flex; align-items: center; gap: 4px;
+    padding: 7px 8px; border-radius: 6px; cursor: pointer;
+  }
+  .row:hover { background: var(--hover); }
+  .row.active { background: var(--hover); font-weight: 600; }
+  .row .title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row .sub { color: var(--muted); font-size: 12px; flex-shrink: 0; }
+  .row input {
+    flex: 1; font: inherit; color: var(--text); background: var(--panel);
+    border: 1px solid var(--accent); border-radius: 4px; padding: 1px 4px; min-width: 0;
+  }
+  .row .actions { display: none; gap: 2px; }
+  .row:hover .actions, .row.active .actions { display: flex; }
+  .icon-btn {
+    border: none; background: none; color: var(--muted); cursor: pointer;
+    padding: 2px 5px; border-radius: 4px; font-size: 13px;
+  }
+  .icon-btn:hover { color: var(--text); background: var(--border); }
+  .icon-btn.del:hover { color: var(--danger); }
+  .empty-list { color: var(--muted); padding: 8px; font-size: 13px; }
+  .section {
+    color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; padding: 12px 8px 4px;
+  }
+  #lib-path {
+    margin: 10px 12px 0; font-size: 12px; color: var(--muted);
+    word-break: break-all; line-height: 1.4;
+  }
+  #lib-path .links { margin-top: 4px; display: flex; gap: 10px; }
+  .link { background: none; border: none; padding: 0; color: var(--accent); cursor: pointer; font-size: 12px; }
+  #lib-warning {
+    display: none; margin: 8px 12px 0; padding: 7px 9px; border-radius: 6px; font-size: 12px;
+    background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--text);
+  }
+  #meta {
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  /* ---------- Main ---------- */
+  #main { flex: 1; display: flex; flex-direction: column; min-width: 0; position: relative; }
+  #topbar {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 10px 20px; border-bottom: 1px solid var(--border);
+  }
+  #model {
+    font: inherit; color: var(--text); background: var(--panel);
+    border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; max-width: 360px;
+  }
+  #fit { font-size: 13px; color: var(--muted); }
+  #fit.ok { color: var(--ok); }
+  #fit.warn { color: var(--warn); }
+  #pull { display: none; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); flex: 1; min-width: 200px; }
+  #pull .bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; max-width: 260px; }
+  #pull .bar div { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+  #hf-form {
+    display: none; padding: 12px 20px; border-bottom: 1px solid var(--border);
+    background: var(--panel); font-size: 13px;
+  }
+  #hf-form.open { display: block; }
+  #hf-form .line { display: flex; gap: 8px; align-items: center; }
+  #hf-ref {
+    flex: 1; font: inherit; font-size: 14px; color: var(--text); background: var(--bg);
+    border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; outline: none;
+  }
+  #hf-ref:focus { border-color: var(--accent); }
+  #hf-form p { margin: 8px 0 0; color: var(--muted); line-height: 1.45; }
+  #hf-form code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+
+  #messages { flex: 1; overflow-y: auto; padding: 24px 0; }
+  .col { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+  .msg { margin: 0 0 18px; }
+  .msg.user .bubble {
+    background: var(--user-bg);
+    padding: 10px 14px;
+    border-radius: 12px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin-left: auto;
+    width: fit-content;
+    max-width: 85%;
+  }
+  .msg.assistant .bubble { word-wrap: break-word; }
+  .bubble > :first-child { margin-top: 0; }
+  .bubble > :last-child { margin-bottom: 0; }
+  .bubble pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 13.5px;
+  }
+  .bubble code, .plain { font-family: Consolas, "Cascadia Code", monospace; }
+  .bubble :not(pre) > code {
+    background: var(--code-bg); padding: 1px 5px; border-radius: 4px; font-size: 0.92em;
+  }
+  .bubble table { border-collapse: collapse; margin: 8px 0; }
+  .bubble th, .bubble td { border: 1px solid var(--border); padding: 5px 10px; }
+  .bubble a { color: var(--accent); }
+  .bubble blockquote { border-left: 3px solid var(--border); margin-left: 0; padding-left: 12px; color: var(--muted); }
+  .msg-actions { margin-top: 4px; opacity: 0; transition: opacity .15s; }
+  .msg.assistant:hover .msg-actions { opacity: 1; }
+  .activity { color: var(--muted); font-size: 13px; margin: -8px 0 12px; }
+  .note { color: var(--muted); font-size: 13px; font-style: italic; margin-top: 6px; }
+  .error { color: var(--danger); font-size: 14px; margin: -6px 0 16px; }
+  .typing::after { content: "▍"; animation: blink 1s steps(1) infinite; color: var(--muted); }
+  @keyframes blink { 50% { opacity: 0; } }
+  #welcome { color: var(--muted); text-align: center; margin-top: 16vh; }
+  #welcome h1 { color: var(--text); font-weight: 600; font-size: 24px; margin-bottom: 6px; }
+
+  /* ---------- Composer ---------- */
+  #composer { padding: 12px 0 16px; }
+  #composer .col { display: flex; gap: 8px; align-items: flex-end; }
+  #input {
+    flex: 1;
+    resize: none;
+    font: inherit;
+    color: var(--text);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 11px 14px;
+    max-height: 220px;
+    overflow-y: hidden;
+    outline: none;
+  }
+  #input:focus { border-color: var(--accent); }
+  #send {
+    border: none;
+    border-radius: 10px;
+    padding: 11px 18px;
+    background: var(--accent);
+    color: var(--accent-text);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  #send.stop { background: var(--danger); }
+  .hint { color: var(--muted); font-size: 12px; margin-top: 6px; display: flex; gap: 14px; align-items: center; }
+  .hint label { display: flex; align-items: center; gap: 5px; cursor: pointer; color: var(--text); }
+  #banner {
+    display: none;
+    background: var(--danger);
+    color: #fff;
+    padding: 8px 20px;
+    font-size: 14px;
+    align-items: center;
+    gap: 12px;
+  }
+  #banner.info { background: var(--accent); color: var(--accent-text); }
+  #banner button {
+    border: 1px solid currentColor; background: none; color: inherit;
+    border-radius: 6px; padding: 3px 10px; cursor: pointer; font-weight: 600;
+  }
+
+  /* ---------- Document viewer ---------- */
+  #viewer {
+    display: none; position: absolute; top: 0; right: 0; bottom: 0; width: min(560px, 60%);
+    background: var(--panel); border-left: 1px solid var(--border);
+    box-shadow: -8px 0 24px rgba(0,0,0,.18); flex-direction: column; z-index: 5;
+  }
+  #viewer.open { display: flex; }
+  #viewer header {
+    display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border);
+  }
+  #viewer header h2 { flex: 1; margin: 0; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .badge { font-size: 11px; padding: 2px 7px; border-radius: 10px; background: var(--hover); color: var(--muted); }
+  .small-btn {
+    border: 1px solid var(--border); background: var(--bg); border-radius: 6px;
+    padding: 4px 10px; cursor: pointer; font-size: 13px;
+  }
+  .small-btn:hover { background: var(--hover); }
+  #viewer .body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+  .plain { white-space: pre-wrap; font-size: 13.5px; }
+</style>
+</head>
+<body>
+  <aside id="sidebar">
+    <div id="tabs">
+      <button class="tab active" data-tab="chats">Chats</button>
+      <button class="tab" data-tab="library">Library</button>
+    </div>
+
+    <div class="pane active" id="pane-chats">
+      <button class="side-btn" id="new-chat">＋ New chat</button>
+      <div class="list" id="threads"></div>
+    </div>
+
+    <div class="pane" id="pane-library">
+      <div id="lib-path">
+        <div id="lib-path-text">…</div>
+        <div class="links">
+          <button class="link" id="lib-change">Change folder</button>
+          <button class="link" id="lib-open">Open in Explorer</button>
+        </div>
+      </div>
+      <div id="lib-warning"></div>
+      <button class="side-btn" id="import">⤓ Import .txt / .md files</button>
+      <div class="list" id="docs"></div>
+    </div>
+
+    <div id="meta">Connecting…</div>
+  </aside>
+
+  <main id="main">
+    <div id="topbar">
+      <select id="model" title="Model"></select>
+      <span id="fit"></span>
+      <button class="link" id="remove-model" style="display:none">Remove this model</button>
+      <div id="pull"><span id="pull-text"></span><div class="bar"><div></div></div></div>
+    </div>
+    <div id="hf-form">
+      <div class="line">
+        <input id="hf-ref" placeholder="hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M" spellcheck="false">
+        <button class="small-btn" id="hf-add">Download</button>
+        <button class="icon-btn" id="hf-cancel" title="Cancel">✕</button>
+      </div>
+      <p>
+        Paste a Hugging Face <b>GGUF</b> model: <code>hf.co/&lt;user&gt;/&lt;repo&gt;</code>, optionally with
+        <code>:&lt;quantization&gt;</code> (e.g. <code>:Q4_K_M</code>), or the repo's URL.
+        For library tools, pick an <i>instruct</i> model whose page mentions tool or function calling.
+        Models are data, not programs, but anyone can upload one: stick to publishers you trust,
+        and check the model's license on its page.
+      </p>
+    </div>
+    <div id="banner"><span id="banner-text"></span><button id="banner-btn"></button></div>
+    <div id="messages"><div class="col" id="log"></div></div>
+    <div id="composer">
+      <div class="col">
+        <textarea id="input" rows="1" placeholder="Ask, or tell it what to do with your documents…" autofocus></textarea>
+        <button id="send">Send</button>
+      </div>
+      <div class="col hint">
+        <label title="Let the assistant read your library and save drafts"><input type="checkbox" id="tools"> 📚 Library tools</label>
+        <span>Enter to send · Shift+Enter for a new line</span>
+      </div>
+    </div>
+
+    <section id="viewer">
+      <header>
+        <h2 id="viewer-title"></h2>
+        <span class="badge" id="viewer-kind"></span>
+        <button class="small-btn" id="viewer-open">Open in editor</button>
+        <button class="icon-btn" id="viewer-close" title="Close">✕</button>
+      </header>
+      <div class="body" id="viewer-body"></div>
+    </section>
+  </main>
+
+<script>
+  const $ = (s) => document.querySelector(s);
+  const logEl = $("#log");
+  const messagesEl = $("#messages");
+  const input = $("#input");
+  const sendBtn = $("#send");
+  let api = null;
+  let currentId = null;
+  let busy = false;
+  let liveBubble = null;
+  let models = { models: [], current: null, gpu: null };
+  let viewerDoc = null;
+
+  // ---------- helpers ----------
+  function scrollDown(force) {
+    const nearBottom = messagesEl.scrollHeight - messagesEl.scrollTop - messagesEl.clientHeight < 120;
+    if (force || nearBottom) messagesEl.scrollTop = messagesEl.scrollHeight;
+  }
+
+  function banner(text, { action, onAction, info } = {}) {
+    const el = $("#banner");
+    $("#banner-text").textContent = text || "";
+    const btn = $("#banner-btn");
+    btn.style.display = action ? "" : "none";
+    btn.textContent = action || "";
+    btn.onclick = onAction || null;
+    el.classList.toggle("info", !!info);
+    el.style.display = text ? "flex" : "none";
+    if (text && !action) setTimeout(() => { if ($("#banner-text").textContent === text) el.style.display = "none"; }, 6000);
+  }
+
+  const fmtGB = (n) => (n == null ? "" : `${n} GB`);
+
+  // ---------- messages ----------
+  function addMessage(role, { text, html, index }) {
+    if (role === "activity") {
+      const a = document.createElement("div");
+      a.className = "activity";
+      a.textContent = text;
+      logEl.appendChild(a);
+      return a;
+    }
+    const msg = document.createElement("div");
+    msg.className = `msg ${role}`;
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    if (html != null) bubble.innerHTML = html;   // markdown rendered (and escaped) in Python
+    else bubble.textContent = text;
+    msg.appendChild(bubble);
+    if (role === "assistant") attachSave(msg, index);
+    logEl.appendChild(msg);
+    return bubble;
+  }
+
+  function attachSave(msgEl, index) {
+    if (index == null) return;
+    let bar = msgEl.querySelector(".msg-actions");
+    if (!bar) {
+      bar = document.createElement("div");
+      bar.className = "msg-actions";
+      msgEl.appendChild(bar);
+    }
+    bar.innerHTML = "";
+    const b = document.createElement("button");
+    b.className = "small-btn";
+    b.textContent = "💾 Save as draft";
+    b.onclick = async () => {
+      const r = await api.save_reply_as_draft(index);
+      if (r.error) return banner(r.error);
+      b.textContent = `✓ Saved as “${r.title}”`;
+      b.disabled = true;
+      refreshLibrary();
+    };
+    bar.appendChild(b);
+  }
+
+  function showWelcome() {
+    const label = (models.models.find((m) => m.tag === models.current) || {}).label || models.current || "";
+    logEl.innerHTML = `<div id="welcome"><h1>What are we writing?</h1><div id="welcome-sub"></div></div>`;
+    $("#welcome-sub").textContent = label
+      ? `${label} · ${$("#tools").checked ? "library tools on — try “Summarize my notes into a draft”" : "plain chat"}`
+      : "";
+  }
+
+  function renderThread(view) {
+    if (view.error) { banner(view.error); return; }
+    currentId = view.id;
+    $("#tools").checked = !!view.tools;
+    logEl.innerHTML = "";
+    if (!view.messages.length) showWelcome();
+    for (const m of view.messages) addMessage(m.role, { text: m.content, html: m.html, index: m.index });
+    scrollDown(true);
+    refreshThreads();
+  }
+
+  function setBusy(b) {
+    busy = b;
+    sendBtn.textContent = b ? "Stop" : "Send";
+    sendBtn.classList.toggle("stop", b);
+    $("#model").disabled = b;
+    $("#tools").disabled = b;
+  }
+
+  // ---------- threads ----------
+  async function refreshThreads() {
+    const list = await api.list_threads();
+    const box = $("#threads");
+    box.innerHTML = "";
+    if (!list.length) { box.innerHTML = `<div class="empty-list">No saved chats yet.</div>`; return; }
+    for (const t of list) {
+      const row = document.createElement("div");
+      row.className = "row" + (t.id === currentId ? " active" : "");
+      row.title = new Date(t.updated).toLocaleString();
+      const title = document.createElement("span");
+      title.className = "title";
+      title.textContent = (t.tools ? "📚 " : "") + t.title;
+      const actions = document.createElement("span");
+      actions.className = "actions";
+      const ren = document.createElement("button");
+      ren.className = "icon-btn"; ren.textContent = "✎"; ren.title = "Rename";
+      const del = document.createElement("button");
+      del.className = "icon-btn del"; del.textContent = "✕"; del.title = "Delete";
+      actions.append(ren, del);
+      row.append(title, actions);
+      row.onclick = async () => { if (t.id !== currentId) renderThread(await api.open_thread(t.id)); };
+      ren.onclick = (e) => { e.stopPropagation(); startRename(title, t); };
+      row.ondblclick = (e) => { e.stopPropagation(); startRename(title, t); };
+      del.onclick = async (e) => {
+        e.stopPropagation();
+        if (!confirm(`Delete the chat “${t.title}”?`)) return;
+        const res = await api.delete_thread(t.id);
+        if (res.error) return banner(res.error);
+        if (t.id === currentId) renderThread(res); else refreshThreads();
+      };
+      box.appendChild(row);
+    }
+  }
+
+  function startRename(titleEl, t) {
+    const field = document.createElement("input");
+    field.value = t.title;
+    titleEl.replaceWith(field);
+    field.focus(); field.select();
+    let done = false;
+    const finish = async (save) => {
+      if (done) return; done = true;
+      if (save && field.value.trim() && field.value.trim() !== t.title) await api.rename_thread(t.id, field.value.trim());
+      refreshThreads();
+    };
+    field.onclick = (e) => e.stopPropagation();
+    field.onkeydown = (e) => { if (e.key === "Enter") finish(true); if (e.key === "Escape") finish(false); };
+    field.onblur = () => finish(true);
+  }
+
+  // ---------- library ----------
+  async function refreshLibrary() {
+    const info = await api.library_info();
+    $("#lib-path-text").textContent = info.ok ? info.path : (info.error || "Library unavailable");
+    const warn = $("#lib-warning");
+    warn.textContent = info.warning ? `⚠ ${info.warning}` : "";
+    warn.style.display = info.warning ? "block" : "none";
+    const { sources, drafts } = await api.list_documents();
+    const box = $("#docs");
+    box.innerHTML = "";
+    const section = (label, docs, empty) => {
+      const h = document.createElement("div");
+      h.className = "section";
+      h.textContent = `${label} (${docs.length})`;
+      box.appendChild(h);
+      if (!docs.length) {
+        const e = document.createElement("div");
+        e.className = "empty-list";
+        e.textContent = empty;
+        box.appendChild(e);
+      }
+      for (const d of docs) {
+        const row = document.createElement("div");
+        row.className = "row" + (viewerDoc === d.id ? " active" : "");
+        row.title = `${d.filename} · ${d.words} words · ${new Date(d.modified).toLocaleString()}`;
+        const t = document.createElement("span"); t.className = "title"; t.textContent = d.title;
+        const s = document.createElement("span"); s.className = "sub"; s.textContent = `${d.words.toLocaleString()} w`;
+        row.append(t, s);
+        row.onclick = () => openViewer(d.id);
+        box.appendChild(row);
+      }
+    };
+    section("Sources", sources, "Import documents for the assistant to read. Your originals are never changed.");
+    section("Drafts", drafts, "Drafts the assistant writes appear here.");
+  }
+
+  async function openViewer(id) {
+    const d = await api.view_document(id);
+    if (d.error) return banner(d.error);
+    viewerDoc = d.id;
+    $("#viewer-title").textContent = d.title;
+    $("#viewer-kind").textContent = d.kind === "source" ? "source · read-only" : "draft";
+    const body = $("#viewer-body");
+    if (d.html != null) { body.className = "body bubble"; body.innerHTML = d.html; }
+    else { body.className = "body plain"; body.textContent = d.text; }
+    $("#viewer").classList.add("open");
+    refreshLibrary();
+  }
+  $("#viewer-close").onclick = () => { $("#viewer").classList.remove("open"); viewerDoc = null; refreshLibrary(); };
+  $("#viewer-open").onclick = async () => { if (viewerDoc) { const r = await api.open_document(viewerDoc); if (r.error) banner(r.error); } };
+
+  $("#import").onclick = async () => {
+    const r = await api.import_files();
+    if (r.error) return banner(r.error);
+    if (r.skipped && r.skipped.length) banner(`Skipped: ${r.skipped.map((s) => `${s.file} (${s.reason})`).join("; ")}`);
+    else if (r.imported && r.imported.length) banner(`Imported ${r.imported.length} document(s).`, { info: true });
+    refreshLibrary();
+  };
+  $("#lib-change").onclick = async () => {
+    const r = await api.choose_library_folder();
+    if (r.error) banner(r.error);
+    refreshLibrary();
+  };
+  $("#lib-open").onclick = () => api.open_library_folder();
+
+  // ---------- models ----------
+  async function refreshModels() {
+    models = await api.list_models();
+    const sel = $("#model");
+    sel.innerHTML = "";
+    for (const m of models.models) {
+      const o = document.createElement("option");
+      o.value = m.tag;
+      o.textContent = `${m.recommended ? "★ " : ""}${m.label}${m.size_gb ? ` — ${fmtGB(m.size_gb)}` : ""}${m.installed ? "  ✓" : "  ⬇"}${m.fits ? "" : "  ⚠ too big for your GPU"}${m.tools === false ? "  · no tool support" : ""}`;
+      o.title = `${m.blurb}${m.license ? ` · License: ${m.license}` : ""}`;
+      sel.appendChild(o);
+    }
+    const add = document.createElement("option");
+    add.value = "__hf__";
+    add.textContent = "＋ Add from Hugging Face…";
+    sel.appendChild(add);
+    sel.value = models.current;
+    const curModel = models.models.find((m) => m.tag === models.current);
+    $("#remove-model").style.display = curModel && curModel.custom ? "" : "none";
+    const g = models.gpu;
+    $("#meta").textContent = g.backend === "CPU" ? "No supported GPU · running on CPU" : `${g.name.replace(/^NVIDIA GeForce |^AMD /, "")} · ${g.vram_gb} GB`;
+    const cur = models.models.find((m) => m.tag === models.current);
+    if (cur && !cur.installed && !models.pulling) {
+      banner(`${cur.label} isn't downloaded yet (${fmtGB(cur.size_gb)}).`, { action: "Download", onAction: () => startPull(cur), info: true });
+    }
+  }
+
+  async function startPull(m) {
+    const r = await api.pull_model(m.tag);
+    if (r.error) return banner(r.error);
+    banner("");
+    $("#pull").style.display = "flex";
+    $("#pull-text").textContent = `Downloading ${m.label}…`;
+  }
+
+  $("#model").onchange = async (e) => {
+    const tag = e.target.value;
+    const m = models.models.find((x) => x.tag === tag);
+    e.target.value = models.current;  // revert until the switch actually happens
+    if (tag === "__hf__") { $("#hf-form").classList.add("open"); $("#hf-ref").focus(); return; }
+    if (!m) return;
+    if (!m.installed) {
+      const warn = m.fits ? "" : "\n\nIt's larger than your GPU's memory, so it will run partly on the CPU and be slow.";
+      if (confirm(`Download ${m.label} (${fmtGB(m.size_gb)})?${warn}`)) startPull(m);
+      return;
+    }
+    $("#fit").className = ""; $("#fit").textContent = "Loading…";
+    const r = await api.set_model(tag);
+    if (r.error) return banner(r.error);
+    await refreshModels();
+    if ($("#welcome")) showWelcome();
+  };
+
+  async function addHF() {
+    const ref = $("#hf-ref").value.trim();
+    if (!ref) return;
+    const r = await api.add_hf_model(ref);
+    if (r.error) return banner(r.error);
+    $("#hf-form").classList.remove("open");
+    $("#hf-ref").value = "";
+    await refreshModels();
+    if (r.installed) {
+      banner("That model is already downloaded. Pick it from the list.", { info: true });
+    } else {
+      $("#pull").style.display = "flex";
+      $("#pull-text").textContent = `Downloading ${r.tag}…`;
+    }
+  }
+  $("#hf-add").onclick = addHF;
+  $("#hf-ref").onkeydown = (e) => { if (e.key === "Enter") addHF(); if (e.key === "Escape") $("#hf-cancel").click(); };
+  $("#hf-cancel").onclick = () => $("#hf-form").classList.remove("open");
+  $("#remove-model").onclick = async () => {
+    const m = models.models.find((x) => x.tag === models.current);
+    if (!m || !confirm(`Remove ${m.label} and delete its downloaded files${m.size_gb ? ` (${fmtGB(m.size_gb)})` : ""}?`)) return;
+    const r = await api.remove_custom_model(m.tag);
+    if (r.error) return banner(r.error);
+    await refreshModels();
+    api.warm();
+  };
+
+  window.onPull = async (p) => {
+    const m = models.models.find((x) => x.tag === p.tag) || { label: p.tag };
+    if (p.error) { $("#pull").style.display = "none"; await refreshModels(); return banner(`Download failed: ${p.error}`); }
+    if (p.done) {
+      $("#pull").style.display = "none";
+      await api.set_model(p.tag);
+      await refreshModels();
+      const now = models.models.find((x) => x.tag === p.tag) || m;
+      banner(now.tools === false
+        ? `${now.label} downloaded. It doesn't support tool calling, so use it with 📚 Library tools off.`
+        : `${now.label} downloaded.`, { info: true });
+      if ($("#welcome")) showWelcome();
+      return;
+    }
+    const pct = p.total ? Math.floor((100 * p.completed) / p.total) : 0;
+    $("#pull-text").textContent = p.total ? `Downloading ${m.label}… ${pct}%` : `${m.label}: ${p.status}`;
+    $("#pull .bar div").style.width = `${pct}%`;
+  };
+
+  window.onFit = (f) => {
+    const el = $("#fit");
+    if (!f || f.model !== models.current || !f.label) return;
+    el.textContent = f.context ? `${f.label} · ${f.context.toLocaleString()} ctx` : f.label;
+    el.className = f.gpu_pct == null ? "" : f.gpu_pct >= 99 ? "ok" : "warn";
+    el.title = f.gpu_pct != null && f.gpu_pct < 99 ? "Part of the model is running on the CPU, which is slower. A smaller model will be faster." : "";
+  };
+
+  // ---------- chatting ----------
+  function newLiveBubble() {
+    liveBubble = addMessage("assistant", { html: "" });
+    liveBubble.classList.add("typing");
+  }
+  function dropEmptyLive() {
+    if (liveBubble && !liveBubble.textContent.trim()) liveBubble.parentElement.remove();
+  }
+
+  async function send() {
+    if (busy) { api.stop(); return; }
+    const text = input.value.trim();
+    if (!text) return;
+    const res = await api.send(text);
+    if (res.error) { if (res.error !== "empty") banner(res.error); return; }
+    if ($("#welcome")) logEl.innerHTML = "";
+    input.value = "";
+    autosize();
+    addMessage("user", { text });
+    newLiveBubble();
+    currentId = res.id;
+    setBusy(true);
+    scrollDown(true);
+    refreshThreads();
+  }
+
+  window.onChunk = (html) => {
+    if (!liveBubble) return;
+    liveBubble.innerHTML = html;
+    scrollDown(false);
+  };
+  window.onActivity = (label) => {
+    if (liveBubble) { liveBubble.classList.remove("typing"); dropEmptyLive(); }
+    addMessage("activity", { text: label });
+    newLiveBubble();
+    scrollDown(false);
+    if (/Created|Revised/.test(label)) refreshLibrary();
+  };
+  window.onDone = ({ html, index, status, fit }) => {
+    if (liveBubble) {
+      liveBubble.classList.remove("typing");
+      if (html) {
+        liveBubble.innerHTML = html;
+        attachSave(liveBubble.parentElement, index);
+      }
+      if (status === "stopped") liveBubble.insertAdjacentHTML("afterend", `<div class="note">Stopped.</div>`);
+      if (status === "max_steps") liveBubble.insertAdjacentHTML("afterend", `<div class="note">Stopped after too many steps. Try a more specific request.</div>`);
+      if (status === "unsaved") liveBubble.insertAdjacentHTML("afterend", `<div class="note">⚠ Nothing was saved to the library${html ? " — use 💾 Save as draft to keep this reply" : ""}. (Checked by the app, not the model.)</div>`);
+      dropEmptyLive();
+    }
+    liveBubble = null;
+    setBusy(false);
+    refreshThreads();
+    refreshLibrary();
+    window.onFit(fit);
+    input.focus();
+  };
+  window.onError = ({ message }) => {
+    if (liveBubble) { liveBubble.classList.remove("typing"); dropEmptyLive(); }
+    const err = document.createElement("div");
+    err.className = "error";
+    err.textContent = message;
+    logEl.appendChild(err);
+    liveBubble = null;
+    setBusy(false);
+    refreshThreads();
+  };
+
+  // ---------- error reporting (to app.log) ----------
+  window.addEventListener("error", (e) => api && api.log_client_error(`${e.message} @ ${e.filename}:${e.lineno}`));
+  window.addEventListener("unhandledrejection", (e) => api && api.log_client_error(`unhandled: ${e.reason && (e.reason.stack || e.reason.message || e.reason)}`));
+
+  // ---------- misc wiring ----------
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest("a[href]");
+    if (!a) return;
+    e.preventDefault();
+    api && api.open_link(a.href);
+  });
+
+  function autosize() {
+    input.style.height = "auto";
+    const full = input.scrollHeight + 2;
+    input.style.height = Math.min(full, 220) + "px";
+    input.style.overflowY = full > 220 ? "auto" : "hidden";
+  }
+  input.addEventListener("input", autosize);
+  input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
+  sendBtn.onclick = send;
+  $("#new-chat").onclick = async () => { renderThread(await api.new_chat()); input.focus(); };
+  $("#tools").onchange = async (e) => {
+    const r = await api.set_tools_enabled(e.target.checked);
+    if (r.error) { banner(r.error); e.target.checked = !e.target.checked; }
+    if ($("#welcome")) showWelcome();
+  };
+  for (const tab of document.querySelectorAll(".tab")) {
+    tab.onclick = () => {
+      document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t === tab));
+      document.querySelectorAll(".pane").forEach((p) => p.classList.toggle("active", p.id === `pane-${tab.dataset.tab}`));
+      if (tab.dataset.tab === "library") refreshLibrary();
+    };
+  }
+
+  window.addEventListener("pywebviewready", async () => {
+    api = window.pywebview.api;
+    const info = await api.system_info();
+    if (!info.server) banner("Can't reach the Ollama server. Start the Ollama app, then restart this one.");
+    await refreshModels();
+    renderThread(await api.current());
+    refreshLibrary();
+    $("#fit").textContent = "Loading model…";
+    api.warm();
+  });
+</script>
+</body>
+</html>
