@@ -77,6 +77,7 @@ def new_thread(tools: bool) -> dict:
         "id": f"{stamp}-{uuid.uuid4().hex[:6]}",
         "title": "New chat",
         "tools": tools,
+        "instructions": "",  # this chat's system prompt (style, tone, preferences)
         "created": now_iso(),
         "updated": now_iso(),
         "messages": [],
@@ -95,6 +96,7 @@ def save_thread(thread: dict) -> None:
 def load_thread(thread_id: str) -> dict:
     t = json.loads(thread_path(thread_id).read_text(encoding="utf-8"))
     t.setdefault("tools", False)  # threads from before the library existed
+    t.setdefault("instructions", "")
     return t
 
 
@@ -188,6 +190,7 @@ class Api:
             "id": thread["id"],
             "title": thread["title"],
             "tools": bool(thread.get("tools")),
+            "instructions": thread.get("instructions", ""),
             "messages": out,
         }
 
@@ -258,14 +261,18 @@ class Api:
         return {"model": self._model, **models.template_info(self._model)}
 
     def get_instructions(self) -> dict:
-        return {"text": self._cfg["instructions"], "max": settings.MAX_INSTRUCTIONS, **self.model_support()}
+        """The current chat's instructions (each chat has its own)."""
+        return {"text": self._thread.get("instructions", ""), "max": settings.MAX_INSTRUCTIONS, **self.model_support()}
 
     def set_instructions(self, text: str) -> dict:
+        if err := self._not_busy():
+            return err
         text = str(text or "").strip()
         if len(text) > settings.MAX_INSTRUCTIONS:
             return {"error": f"Instructions are limited to {settings.MAX_INSTRUCTIONS:,} characters."}
-        self._cfg["instructions"] = text
-        settings.save(self._cfg)
+        self._thread["instructions"] = text
+        if thread_path(self._thread["id"]).exists():  # a new chat is saved with its first message
+            save_thread(self._thread)
         return self.get_instructions()
 
     def add_hf_model(self, ref: str) -> dict:
@@ -554,7 +561,7 @@ class Api:
             if thread.get("tools") and self._lib:
                 status = agent.run_turn(
                     self._lib, thread["messages"], model, self._num_ctx, on_text, on_activity, self._stop.is_set,
-                    instructions=self._cfg["instructions"],
+                    instructions=thread.get("instructions", ""),
                     system_supported=models.template_info(model)["system"],
                 )
             else:
@@ -584,7 +591,7 @@ class Api:
 
     def _plain_chat(self, thread: dict, model: str, on_text) -> str:
         reply: list[str] = []
-        system = self._cfg["instructions"].strip() or CHAT_PROMPT
+        system = thread.get("instructions", "").strip() or CHAT_PROMPT
         msgs = agent.with_system(system, agent.to_ollama(thread["messages"]), models.template_info(model)["system"])
         stream = ollama.chat(
             model=model, messages=msgs, stream=True, options={"num_ctx": self._num_ctx}, **models.chat_options(model)

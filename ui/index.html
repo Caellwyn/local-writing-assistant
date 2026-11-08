@@ -310,7 +310,7 @@
       <div id="pull"><span id="pull-text"></span><div class="bar"><div></div></div></div>
     </div>
     <div id="instr-form">
-      <textarea id="instr-text" placeholder="Standing instructions for every chat, e.g. “Write in British English. Keep a warm, plain tone. Never use em dashes.”"></textarea>
+      <textarea id="instr-text" placeholder="Instructions for this chat, e.g. “Write in British English. Keep a warm, plain tone. Never use em dashes.”"></textarea>
       <div class="line">
         <span id="instr-note"></span>
         <span id="instr-count" style="color: var(--muted)"></span>
@@ -444,6 +444,8 @@
     if (view.error) { banner(view.error); return; }
     currentId = view.id;
     $("#tools").checked = !!view.tools;
+    setInstrIndicator(view.instructions);
+    if ($("#instr-form").classList.contains("open")) loadInstructions(true);
     logEl.innerHTML = "";
     if (!view.messages.length) showWelcome();
     for (const m of view.messages) addMessage(m.role, { text: m.content, html: m.html, index: m.index });
@@ -639,17 +641,23 @@
     if ($("#welcome")) showWelcome();
   };
 
-  async function loadInstructions() {
+  function setInstrIndicator(text) {
+    const b = $("#instr-open");
+    b.textContent = text ? "⚙ Instructions •" : "⚙ Instructions";
+    b.title = text ? `This chat's instructions: ${text}` : "Instructions for this chat (system prompt)";
+  }
+
+  async function loadInstructions(force) {
     const r = await api.get_instructions();
     const ta = $("#instr-text");
-    if (document.activeElement !== ta) ta.value = r.text;
+    if (force || document.activeElement !== ta) ta.value = r.text;
     ta.maxLength = r.max;
     const note = $("#instr-note");
     if (r.system === false) {
       note.textContent = "⚠ This model's chat template has no system prompt. Your instructions will be added to the start of each chat's first message instead.";
       note.className = "warn";
     } else {
-      note.textContent = r.system ? "Sent as the system prompt for every chat (library chats add them after the assistant's built-in rules)." : "";
+      note.textContent = r.system ? "Sent as this chat's system prompt (library chats add them after the assistant's built-in rules). New chats start blank." : "";
       note.className = "";
     }
     updateCount();
@@ -661,14 +669,15 @@
   $("#instr-text").addEventListener("input", updateCount);
   $("#instr-open").onclick = async () => {
     const f = $("#instr-form");
-    if (f.classList.toggle("open")) { await loadInstructions(); $("#instr-text").focus(); }
+    if (f.classList.toggle("open")) { await loadInstructions(true); $("#instr-text").focus(); }
   };
   $("#instr-cancel").onclick = () => $("#instr-form").classList.remove("open");
   $("#instr-save").onclick = async () => {
     const r = await api.set_instructions($("#instr-text").value);
     if (r.error) return banner(r.error);
     $("#instr-form").classList.remove("open");
-    banner(r.text ? "Instructions saved. They apply from your next message." : "Instructions cleared.", { info: true });
+    setInstrIndicator(r.text);
+    banner(r.text ? "Instructions saved for this chat. They apply from your next message." : "Instructions cleared for this chat.", { info: true });
   };
 
   async function addHF() {
