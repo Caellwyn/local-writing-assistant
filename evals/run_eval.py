@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import statistics
@@ -42,6 +43,7 @@ import agent  # noqa: E402
 import hardware  # noqa: E402
 import models  # noqa: E402
 import research  # noqa: E402
+import research_server  # noqa: E402
 from library import Library  # noqa: E402
 
 CORPUS = HERE / ".corpus"
@@ -99,14 +101,18 @@ def label(c: dict) -> str:
     return f"{short(c['researcher'])} · {s}{extra}"
 
 
+SERVER_HOST: str | None = None  # the private research server the run uses (None: your own Ollama)
+
+
 def unload_all() -> None:
-    for m in ollama.ps().models:
-        ollama.generate(model=m.model, prompt="", keep_alive=0)
+    client = ollama.Client(host=SERVER_HOST) if SERVER_HOST else ollama.Client()
+    for m in client.ps().models:
+        client.generate(model=m.model, prompt="", keep_alive=0)
     time.sleep(1)
 
 
 def gpu_split(model: str) -> str:
-    f = hardware.fit_check(model)
+    f = hardware.fit_check(model, SERVER_HOST)
     return f"{f['gpu_pct']}% GPU" if f else "n/a"
 
 
@@ -1280,7 +1286,10 @@ def main() -> int:
                    help="finders for the researchers round (default: the locked-in finder)")
     p.add_argument("--researcher", default="qwen3:4b-instruct", help="researcher for the finders round")
     p.add_argument("--chunk-words", nargs="+", type=int, default=[1500, 1000, 2000])
-    p.add_argument("--workers", type=int, default=models.server_parallel())
+    p.add_argument("--workers", type=int, default=None,
+                   help="parallel finder requests (default: the server's slots)")
+    p.add_argument("--main-ollama", action="store_true",
+                   help="run on your own Ollama instead of the app's private 4-slot research server")
     p.add_argument("--questions", nargs="*", help="question ids to run (default: all)")
     p.add_argument("--repeat", type=int, default=2, help="supervisor trials per model")
     p.add_argument("--strategies", nargs="*", help="pipeline round: only these strategies (rag single focused loop hybrid)")
@@ -1313,11 +1322,28 @@ def main() -> int:
         if args.round != "supervisor":
             write_review(args.round, configs, started)
 
+    global SERVER_HOST
+    server = None if args.main_ollama else research_server.ResearchServer()
+    if server:  # the app's research setup: 4 slots, q8_0 cache (research_server.py)
+        SERVER_HOST = server.ensure()
+        if SERVER_HOST:
+            os.environ.update({"OLLAMA_HOST": SERVER_HOST,  # read by every ollama.Client() made from here on
+                               "OLLAMA_NUM_PARALLEL": str(research_server.RESEARCH_PARALLEL),
+                               "OLLAMA_KV_CACHE_TYPE": "q8_0"})
+            print(f"Research server: {SERVER_HOST} ({research_server.RESEARCH_PARALLEL} slots)")
+        else:
+            print(f"Research server unavailable ({server.failed}); using your Ollama")
+    args.workers = args.workers or models.server_parallel()
+
     started = datetime.now().strftime("%Y-%m-%d %H:%M")  # one review file per run, rewritten as it goes
     fn = {"finders": round_finders, "researchers": round_researchers, "pipeline": round_pipeline,
           "library": round_library, "supervisor": round_supervisor}[args.round]
-    result = fn(args, save)
-    save(result["configs"], partial=False)
+    try:
+        result = fn(args, save)
+        save(result["configs"], partial=False)
+    finally:
+        if server:
+            server.stop()
     result["tracker"].write("finished")
     print(f"\nwrote {HERE / 'results.md'}")
     return 0

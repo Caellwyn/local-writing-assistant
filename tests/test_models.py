@@ -124,3 +124,53 @@ def test_template_info_renderer(monkeypatch, modelfile, template, expected):
     monkeypatch.setattr(models.ollama, "show", lambda tag: info)
     models.template_info.cache_clear()
     assert models.template_info("m")["system"] is expected
+
+
+# -- Freeing models when the app closes ------------------------------------------
+
+class _FakeOllama:
+    """Stands in for ollama.Client: what's loaded, and which models were asked to unload."""
+
+    def __init__(self, loaded, down=False):
+        self.loaded, self.down, self.unloaded = loaded, down, []
+
+    def __call__(self, timeout=None):
+        return self
+
+    def ps(self):
+        if self.down:
+            raise ConnectionError("Ollama isn't running")
+        return type("PS", (), {"models": [type("M", (), {"model": m})() for m in self.loaded]})()
+
+    def generate(self, model, keep_alive=None):
+        assert keep_alive == 0
+        self.unloaded.append(model)
+
+
+def test_unload_used_frees_only_this_apps_loaded_models(monkeypatch):
+    fake = _FakeOllama(["qwen3:4b-instruct", "qwen3.5:9b", "llama3.1:8b", "mymodel:latest"])
+    monkeypatch.setattr(models.ollama, "Client", fake)
+    monkeypatch.setattr(models, "_used", set())
+    for tag in ("qwen3:4b-instruct", "qwen3.5:9b", "mymodel", "qwen3-embedding:0.6b"):
+        models.note_used(tag)
+    freed = models.unload_used()
+    # llama3.1:8b belongs to another program; the embedding model isn't loaded (asking would load it)
+    assert sorted(freed) == sorted(fake.unloaded) == ["mymodel", "qwen3.5:9b", "qwen3:4b-instruct"]
+
+
+def test_unload_used_is_quiet_when_nothing_to_do(monkeypatch):
+    monkeypatch.setattr(models, "_used", set())
+    monkeypatch.setattr(models.ollama, "Client", _FakeOllama(["qwen3.5:9b"]))
+    assert models.unload_used() == []  # the app never loaded anything
+    models.note_used("qwen3.5:9b")
+    monkeypatch.setattr(models.ollama, "Client", _FakeOllama([], down=True))
+    assert models.unload_used() == []  # Ollama isn't running
+
+
+@pytest.mark.parametrize("tag,expected_gb", [("qwen3.5:4b", 3.9), ("qwen3.5:9b", 7.0)])
+def test_qwen35_in_catalog_with_reasoning_off(monkeypatch, tag, expected_gb):
+    _server(monkeypatch, 4, "q8_0")
+    m = models.by_tag(tag)
+    assert m and models.chat_options(tag) == {"think": False}  # thinking-capable: reasoning off for chat
+    # hybrid cache (every 4th layer): estimate matches `ollama ps` on the dev machine
+    assert models.model_fit_gb(m) == pytest.approx(expected_gb, abs=0.15)

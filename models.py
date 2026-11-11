@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import re
 import sys
+import threading
 from functools import lru_cache
 from typing import Callable
 
@@ -33,6 +34,13 @@ CATALOG: list[dict] = [
         "blurb": "Strong for its size; the most reliable tool use in the lineup.",
     },
     {
+        # Qwen3.5 is a hybrid: only every 4th layer keeps a context cache (8 x 4 heads x 512).
+        # Reasoning is switched off for chat (thinking=True -> think=False), like Qwen3 8B/14B.
+        "tag": "qwen3.5:4b", "label": "Qwen3.5 4B", "size_gb": 3.3, "kv_elems": 8 * 4 * 512,
+        "fit_gb": 4.0, "thinking": True, "license": "Apache 2.0",
+        "blurb": "Newer small Qwen with a small context cache. Not yet tested with the library tools.",
+    },
+    {
         "tag": "llama3.1:8b", "label": "Llama 3.1 8B", "size_gb": 4.9, "kv_elems": 32 * 8 * 256,
         "fit_gb": 5.8, "thinking": False, "license": "Llama 3.1 Community License",
         "blurb": "Good prose for plain chat; less reliable with library tools.",
@@ -41,6 +49,11 @@ CATALOG: list[dict] = [
         "tag": "qwen3:8b", "label": "Qwen3 8B", "size_gb": 5.2, "kv_elems": 36 * 8 * 256,
         "fit_gb": 6.6, "thinking": True, "license": "Apache 2.0",
         "blurb": "Sharper reasoning; needs more than 8 GB at 8K context.",
+    },
+    {
+        "tag": "qwen3.5:9b", "label": "Qwen3.5 9B", "size_gb": 6.6, "kv_elems": 8 * 4 * 512,
+        "fit_gb": 7.2, "thinking": True, "license": "Apache 2.0",
+        "blurb": "Strong writer and the default research model. Runs partly on the CPU with 8 GB.",
     },
     {
         # Gemma uses sliding-window attention on most layers; its exact cache
@@ -65,6 +78,47 @@ DEFAULT_CTX = 8192
 OVERHEAD_GB = 0.3  # compute buffers etc.; calibrated against `ollama ps` on the dev machine
 # bytes per cached value for each OLLAMA_KV_CACHE_TYPE (q8_0/q4_0 store a scale per 32 values)
 KV_BYTES = {"f16": 2.0, "q8_0": 34 / 32, "q4_0": 18 / 32}
+
+
+# -- Models this app has loaded ------------------------------------------------
+# Ollama keeps a model in memory for minutes after its last request (keep_alive). Every place the
+# app sends a request records the model here, so closing the app can free them straight away.
+_used: set[str] = set()
+_used_lock = threading.Lock()
+
+
+def note_used(tag: str) -> None:
+    with _used_lock:
+        _used.add(tag)
+
+
+def _full_tag(tag: str) -> str:
+    """Ollama lists `name` as `name:latest`."""
+    return tag if ":" in tag.rsplit("/", 1)[-1] else f"{tag}:latest"
+
+
+def unload_used(timeout: float = 5.0) -> list[str]:
+    """Ask Ollama to unload every model this app used that is still loaded (keep_alive=0).
+    Models loaded by other programs are left alone. Returns the tags unloaded."""
+    with _used_lock:
+        used = {_full_tag(t): t for t in _used}
+    if not used:
+        return []
+    client = ollama.Client(timeout=timeout)
+    try:
+        loaded = {m.model for m in client.ps().models}
+    except Exception:
+        return []  # Ollama isn't running: nothing to free
+    freed = []
+    for full, tag in used.items():
+        if full not in loaded:
+            continue  # already gone; an unload request for it would load it first
+        try:
+            client.generate(model=tag, keep_alive=0)
+            freed.append(tag)
+        except Exception:
+            pass
+    return freed
 
 
 def by_tag(tag: str) -> dict | None:

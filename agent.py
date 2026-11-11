@@ -248,15 +248,24 @@ class ToolBox:
             else:
                 progress(f"🧠 {stage.capitalize()}…")
 
+        # prepare(): where to run (the app's private 4-slot research server, see research_server.py)
+        # and how many finders at once; finish(): free that server's models for the chat model.
+        setup = r["prepare"]() if r.get("prepare") else {}
+        think = r.get("think", False)
+        client = research.ModelClient(host=setup["host"], think=think) if setup.get("host") else None
         common = dict(finder_model=r["finder_model"], researcher_model=r["researcher_model"],
-                      workers=r.get("workers", 4), think=r.get("think", False), on_progress=on_progress,
-                      should_stop=r.get("should_stop", lambda: False))
-        if kind == "facts":
-            report = research.find_facts(self.lib, kw["question"], doc_ids=kw.get("doc_ids"),
-                                         strategy=r.get("strategy", research.DEFAULT_STRATEGY),
-                                         rag_mode=r.get("rag_mode"), deep=r.get("deep", False), **common)
-        else:
-            report = research.summarize(self.lib, kw.get("doc_ids"), focus=kw.get("focus") or None, **common)
+                      workers=setup.get("workers") or r.get("workers", 4), think=think, on_progress=on_progress,
+                      should_stop=r.get("should_stop", lambda: False), client=client)
+        try:
+            if kind == "facts":
+                report = research.find_facts(self.lib, kw["question"], doc_ids=kw.get("doc_ids"),
+                                             strategy=r.get("strategy", research.DEFAULT_STRATEGY),
+                                             rag_mode=r.get("rag_mode"), deep=r.get("deep", False), **common)
+            else:
+                report = research.summarize(self.lib, kw.get("doc_ids"), focus=kw.get("focus") or None, **common)
+        finally:
+            if r.get("finish"):
+                r["finish"]()
         scanned = kw.get("doc_ids") or [d.id for d in research._scope(self.lib, None)]
         self.read.update(scanned)  # the pipeline read these documents in full
         note = r["on_report"](report) if r.get("on_report") else None
@@ -495,6 +504,7 @@ def run_turn(
         system = SYSTEM_PROMPT.replace("{library}", library_listing(lib))
         if instructions.strip():
             system += USER_INSTRUCTIONS_HEADER + instructions.strip()
+        models.note_used(model)
         stream = ollama.chat(
             model=model,
             messages=with_system(system, to_ollama(messages), system_supported),

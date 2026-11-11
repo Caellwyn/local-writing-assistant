@@ -585,6 +585,7 @@ class ModelClient:
         system = f"{system}\nRespond only with JSON matching this schema: {json.dumps(schema.model_json_schema())}"
         opts = self._options(role, model)
         cap = MAX_TOKENS.get(role, 1024) + (THINK_BUDGET if opts.get("think") else 0)
+        models.note_used(model)
         for attempt in range(2):
             t = time.time()
             r = self._client.chat(
@@ -621,6 +622,7 @@ class ModelClient:
     def embed(self, model: str, texts: list[str]) -> list[list[float]]:
         """Embedding vectors for texts, in order (the RAG control, retrieval.py)."""
         out: list[list[float]] = []
+        models.note_used(model)
         for i in range(0, len(texts), EMBED_BATCH):
             t = time.time()
             r = self._client.embed(model=model, input=texts[i:i + EMBED_BATCH],

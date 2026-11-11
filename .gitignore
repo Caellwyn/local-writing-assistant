@@ -9,6 +9,7 @@ threads/
 settings.json
 settings.json.bak
 app.log
+research-server.log
 *.tmp
 
 # Evaluation corpus (downloaded)

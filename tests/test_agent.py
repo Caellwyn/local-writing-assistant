@@ -185,3 +185,47 @@ def test_with_system_folds_into_first_user_message():
     assert out[2]["role"] == "user" and out[2]["content"].startswith("[Note from the app]")
     assert out[3]["content"] == "again"  # only the first user message carries the instructions
     assert history[0]["content"] == "hi"  # stored history is never modified
+
+
+def test_closing_the_app_stops_work_and_unloads_models(monkeypatch):
+    import app
+    import models
+    monkeypatch.setattr(models, "unload_used", lambda: ["qwen3.5:9b"])
+    api = app.Api.__new__(app.Api)  # no window, library or settings needed
+    api._stop, api._busy = __import__("threading").Event(), True
+    stopped = []
+    api._research_server = type("S", (), {"stop": lambda self: stopped.append(True)})()
+    assert api.shutdown(grace=0.2) == ["qwen3.5:9b"]
+    assert api._stop.is_set()  # a running reply or research run is told to stop
+    assert stopped  # the private research server (and its model runners) ends too
+
+
+def test_research_runs_on_the_research_server_and_frees_it_after(lib, monkeypatch):
+    import research
+    seen, calls = {}, []
+
+    def find_facts(lib_, q, **kw):
+        seen.update(kw)
+        raise RuntimeError("model crashed")  # finish() must run even when research fails
+
+    monkeypatch.setattr(research, "find_facts", find_facts)
+    box = ToolBox(lib, research={
+        "finder_model": "m", "researcher_model": "m", "workers": 1,
+        "prepare": lambda: calls.append("prepare") or {"host": "http://127.0.0.1:5555", "workers": 4},
+        "finish": lambda: calls.append("finish"),
+    })
+    with pytest.raises(RuntimeError):  # the app reports it; the tool doesn't swallow it
+        box.call("research_library", {"question": "q"})
+    assert calls == ["prepare", "finish"]
+    assert seen["workers"] == 4 and seen["client"]._client._client.base_url.port == 5555
+
+
+def test_research_without_a_research_server_uses_the_main_ollama(lib, monkeypatch):
+    import research
+    seen = {}
+    monkeypatch.setattr(research, "find_facts",
+                        lambda lib_, q, **kw: seen.update(kw) or research.Report("facts", q, stats={}))
+    box = ToolBox(lib, research={"finder_model": "m", "researcher_model": "m", "workers": 1,
+                                 "prepare": lambda: {"host": None, "workers": 1}})
+    box.call("research_library", {"question": "q"})
+    assert seen["client"] is None and seen["workers"] == 1  # find_facts makes its default client

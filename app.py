@@ -37,6 +37,7 @@ import agent
 import hardware
 import models
 import research
+import research_server
 import settings
 from library import Library, LibraryError, clean_title, onedrive_warning
 
@@ -193,6 +194,7 @@ class Api:
         self._thread = new_thread(self._cfg["tools_default"])
         self._busy = False
         self._stop = threading.Event()
+        self._research_server = research_server.ResearchServer()  # started on first research run
         self._pulling: str | None = None
         log.info("gpu=%s model=%s num_ctx=%s", self._gpu, self._model, self._num_ctx)
 
@@ -368,6 +370,7 @@ class Api:
                 self._emit("onFit", {"model": model, "label": "not downloaded"})
                 return
             try:
+                models.note_used(model)
                 ollama.generate(model=model, prompt="", options={"num_ctx": num_ctx}, keep_alive="10m")
             except Exception as e:
                 log.warning("warm-up failed: %s", e)
@@ -584,6 +587,18 @@ class Api:
     def stop(self) -> None:
         self._stop.set()
 
+    def shutdown(self, grace: float = 2.0) -> list[str]:
+        """The window closed: stop any reply or research, then free the models this app loaded,
+        rather than leaving them in GPU memory until Ollama's keep-alive runs out."""
+        self._stop.set()
+        end = time.time() + grace
+        while self._busy and time.time() < end:  # a plain reply stops at its next token
+            time.sleep(0.1)
+        self._research_server.stop()  # ends its model runners too
+        freed = models.unload_used()
+        log.info("closed; unloaded %s", ", ".join(freed) or "nothing")
+        return freed
+
     def log_client_error(self, message: str) -> None:
         """JavaScript errors from the page end up in app.log instead of vanishing."""
         log.error("ui: %s", str(message)[:2000])
@@ -658,6 +673,19 @@ class Api:
 
         search = research.app_search_options(self._cfg.get("research_strategy"), have)
 
+        def prepare() -> dict:
+            """Before a research run: use the private 4-slot research server, and free the GPU for it by
+            unloading the chat model from the user's Ollama (it reloads for the reply afterwards)."""
+            server = self._research_server
+            host = server.ensure(on_start=lambda: self._emit("onProgress", "⚙️ Starting the research server…"))
+            if not host:
+                return {"host": None, "workers": self._cfg.get("research_workers") or models.server_parallel()}
+            models.unload_used()
+            return {"host": host, "workers": self._cfg.get("research_workers") or research_server.RESEARCH_PARALLEL}
+
+        def finish() -> None:
+            self._research_server.unload_all()  # make room for the chat model again
+
         def on_report(report) -> str | None:
             note = None
             retrieved = (report.stats.get("routed") or report.stats.get("strategy")) == "rag-loop"
@@ -681,6 +709,8 @@ class Api:
             "deep": bool(self._cfg.get("deep_research")),
             "on_progress": lambda text: self._emit("onProgress", text),
             "on_report": on_report,
+            "prepare": prepare,
+            "finish": finish,
         }
 
     def research_settings(self) -> dict:
@@ -713,6 +743,7 @@ class Api:
         reply: list[str] = []
         system = thread.get("instructions", "").strip() or CHAT_PROMPT
         msgs = agent.with_system(system, agent.to_ollama(thread["messages"]), models.template_info(model)["system"])
+        models.note_used(model)
         stream = ollama.chat(
             model=model, messages=msgs, stream=True, options={"num_ctx": self._num_ctx}, **models.chat_options(model)
         )
@@ -752,6 +783,11 @@ def main() -> None:
     )
     api._window = window
     webview.start()
+    api.shutdown()
+    # Exit now: research worker threads would otherwise keep the process (and its Ollama requests)
+    # alive until their calls finish. Closing the connections makes Ollama cancel those requests.
+    logging.shutdown()
+    os._exit(0)
 
 
 if __name__ == "__main__":

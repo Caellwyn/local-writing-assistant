@@ -60,17 +60,26 @@ ollama pull qwen3.5:9b             # researcher (thinking off)
 ollama pull qwen3-embedding:0.6b   # retrieval; without it, retrieval falls back to keywords only
 ```
 
-### Parallelism (Ollama settings)
+### Parallelism: a private research server
 
-Finders run in parallel only if Ollama allows several requests per model. This setup uses three Windows **user** environment variables, then restarts Ollama:
+Ollama sets the number of parallel requests per server, when it starts, for every model it loads. Research wants 4 (the finder reads 4 chunks at once: about 3× the throughput on the RTX 4070), but each slot needs its own context cache, so 4 slots push chat models partly onto the CPU: on the dev machine Qwen3 8B ran at 23 tokens/s (76% GPU) with 4 slots and 34 tokens/s (100% GPU) with 1.
+
+So your Ollama keeps its default of 1 slot, and the app starts a second, private Ollama server ([research_server.py](research_server.py)) the first time research runs:
+
+- on a free local port, with `OLLAMA_NUM_PARALLEL=4`, `OLLAMA_KV_CACHE_TYPE=q8_0` and `OLLAMA_FLASH_ATTENTION=1`, reading the same downloaded models (~3–4 s to start, once per session);
+- before each run the app unloads its chat model from your Ollama, so the two servers don't compete for GPU memory; after the run it unloads the research models, and the chat model reloads for the reply;
+- it stops when the app closes. On Windows a job object ties it to the app's process, so it also ends if the app crashes.
+
+If it can't start (no `ollama` executable found, or `OLLAMA_HOST` points to another machine), research uses your Ollama with however many slots it has.
+
+Optional, for your own Ollama: these two Windows **user** environment variables halve context memory for every model (restart Ollama after setting them):
 
 | Variable | Value | Why |
 |---|---|---|
-| `OLLAMA_NUM_PARALLEL` | `4` | 4 simultaneous requests per model: about 3× the total throughput on the RTX 4070 |
-| `OLLAMA_KV_CACHE_TYPE` | `q8_0` | Halves context memory. Each parallel slot needs its own context cache. |
+| `OLLAMA_KV_CACHE_TYPE` | `q8_0` | Half-size context cache, little quality loss |
 | `OLLAMA_FLASH_ATTENTION` | `1` | Required for the compressed cache |
 
-Trade-off: the 4 slots cost +0.6–1.2 GB per loaded model. Models that already fit stay 100% on the GPU (Llama 3.2 3B, Qwen3 4B). Bigger ones spill more onto the CPU: Llama 3.1 8B dropped from about 45 to 25 tokens/s, and a Qwen3.5 9B from 15.7 to 13.9 tokens/s. To revert, delete the three variables (Windows Settings → "Edit environment variables for your account") and restart Ollama.
+When closing, the app also unloads every model it loaded from your Ollama, instead of leaving them in GPU memory until Ollama's keep-alive (5–10 minutes) runs out.
 
 ## Security model
 
@@ -109,8 +118,10 @@ The app recommends the best model for library work that fits your GPU. It estima
 |---|---|---|---|---|
 | Llama 3.2 3B | 2.0 GB | ~3.0 GB | 3.9 GB (measured) | Small GPUs and CPU-only machines |
 | Qwen3 4B (instruct) | 2.5 GB | ~3.8 GB | 4.9 GB (measured) | Most reliable tool use; recommended for 6–10 GB GPUs |
+| Qwen3.5 4B | 3.3 GB | ~3.6 GB | 3.9 GB (measured) | Small context cache; tool use not yet tested here |
 | Llama 3.1 8B | 4.9 GB | 5.8 GB (measured) | 7.0 GB (measured) | Good prose; less reliable with tools |
 | Qwen3 8B | 5.2 GB | ~6.3 GB | ~7.5 GB | 12 GB GPUs |
+| Qwen3.5 9B | 6.6 GB | ~6.7 GB | 7.0 GB (measured) | Default research model; sometimes answers library questions from memory instead of using a tool |
 | Gemma 4 12B | 7.2 GB | ~8.8 GB | ~8.8 GB | Tool use not yet tested here |
 | Qwen3 14B | 9.3 GB | ~10.2 GB | ~11.6 GB | 16 GB GPUs |
 

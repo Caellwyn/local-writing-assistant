@@ -19,7 +19,7 @@ DEFAULTS = {
     # means no swaps, which benchmarked fastest (evals/results.md).
     "finder_model": None,  # reads every chunk and points at relevant sentences
     "researcher_model": None,  # writes the brief and the cited answer / summary
-    "research_workers": None,  # parallel finders; None = Ollama's OLLAMA_NUM_PARALLEL
+    "research_workers": None,  # parallel finders; None = the research server's slots (research_server.py)
     "research_thinking": False,  # let a thinking-capable researcher reason (benchmarked: slower, no gain)
     # How fact-finding gathers evidence (research.APP_STRATEGIES): single | focused | loop | rag-loop | auto.
     # auto (the library benchmark's pick) routes by the question's wording: retrieval for facts and

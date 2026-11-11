@@ -105,10 +105,11 @@ def detect_gpu() -> dict:
     return _nvidia() or _amd_from_registry() or {"name": "No supported GPU", "vram_gb": 0.0, "backend": "CPU"}
 
 
-def fit_check(model: str) -> dict | None:
-    """How a loaded model is split between GPU and CPU, per Ollama's /api/ps."""
+def fit_check(model: str, base_url: str | None = None) -> dict | None:
+    """How a loaded model is split between GPU and CPU, per Ollama's /api/ps (base_url: another server,
+    e.g. the research server)."""
     try:
-        data = httpx.get(f"{OLLAMA_URL}/api/ps", timeout=3).json()
+        data = httpx.get(f"{base_url or OLLAMA_URL}/api/ps", timeout=3).json()
     except (httpx.HTTPError, ValueError):
         return None
     for m in data.get("models", []):
