@@ -15,6 +15,17 @@ DEFAULTS = {
     "library_path": str(Path.home() / "Ollama Library"),
     "tools_default": True,  # library tools on for new chats
     "custom_models": [],  # Hugging Face models the user added (hf.co/user/repo:quant)
+    # Research agents (research.py). None = use the current chat model: one model for every role
+    # means no swaps, which benchmarked fastest (evals/results.md).
+    "finder_model": None,  # reads every chunk and points at relevant sentences
+    "researcher_model": None,  # writes the brief and the cited answer / summary
+    "research_workers": None,  # parallel finders; None = Ollama's OLLAMA_NUM_PARALLEL
+    "research_thinking": False,  # let a thinking-capable researcher reason (benchmarked: slower, no gain)
+    # How fact-finding gathers evidence (research.APP_STRATEGIES): single | focused | loop | rag-loop | auto.
+    # auto (the library benchmark's pick) routes by the question's wording: retrieval for facts and
+    # chains, a full scan for judgement and collect-all questions. deep_research: more follow-up rounds.
+    "research_strategy": "auto",
+    "deep_research": False,
 }
 
 MAX_INSTRUCTIONS = 4000  # characters, per chat (instructions live in each chat's thread file)

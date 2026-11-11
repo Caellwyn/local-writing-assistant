@@ -1,0 +1,846 @@
+{
+  "source": "evals/.corpus/raw/pg1661.txt (Project Gutenberg #1661, The Adventures of Sherlock Holmes)",
+  "stories": [
+    "VII. The Adventure of the Blue Carbuncle",
+    "VIII. The Adventure of the Speckled Band",
+    "IX. The Adventure of the Engineer’s Thumb",
+    "X. The Adventure of the Noble Bachelor",
+    "XI. The Adventure of the Beryl Coronet",
+    "XII. The Adventure of the Copper Beeches"
+  ],
+  "instances": [
+    {
+      "habit": "lounges_then_acts",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "He was lounging upon the sofa in a purple dressing-gown",
+      "note": "lounging in dressing-gown before the case; later a brisk night pursuit across London"
+    },
+    {
+      "habit": "uses_records",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "morning papers, evidently newly studied, near at hand.",
+      "note": "pile of freshly studied morning papers"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "A lens and a forceps lying upon the seat of the chair",
+      "note": "hat set up for examination with lens and forceps"
+    },
+    {
+      "habit": "reads_people",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "That the man was highly intellectual is",
+      "note": "deduces Henry Baker's intellect, decline, and habits from his hat"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "For answer Holmes clapped the hat upon his head.",
+      "note": "explains each hat inference to Watson"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "be gathered from a close examination of the lower part of the lining.",
+      "note": "lens shows hair-ends and lime-cream in the lining"
+    },
+    {
+      "habit": "uses_records",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "read the advertisement about it in _The Times_ every day lately.",
+      "note": "knows the stone from Times advertisements"
+    },
+    {
+      "habit": "uses_records",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "He rummaged amid his newspapers, glancing over the dates,",
+      "note": "finds the police-court report in his papers"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "So much for the police-court,” said Holmes thoughtfully",
+      "note": "dismisses the official case against Horner"
+    },
+    {
+      "habit": "uses_records",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "in an advertisement in all the evening papers.",
+      "note": "advertises in the evening papers to find Baker"
+    },
+    {
+      "habit": "informants_and_agents",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "Here you are, Peterson, run",
+      "note": "sends the commissionaire to place the advertisements"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "however, I shall determine by a very simple test if we have an answer",
+      "note": "plans a test of Baker's innocence"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "Of course, we still have the feathers, legs, crop, and so on of your",
+      "note": "offers Baker the goose's crop to see if he knows of the stone"
+    },
+    {
+      "habit": "reads_people",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "cold night, and I observe that your circulation is more adapted for",
+      "note": "notes Baker's poor circulation"
+    },
+    {
+      "habit": "ignores_food_sleep",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "Then I suggest that we turn our dinner into a supper and follow up",
+      "note": "postpones dinner to follow the clue"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "which has been missed by the police, and which a singular chance has",
+      "note": "pursues a line the police missed"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "and I have a fiver on it that the bird I ate is country",
+      "note": "draws Breckinridge out with a bet"
+    },
+    {
+      "habit": "reads_people",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "When you see a man with whiskers of that cut and the",
+      "note": "reads Breckinridge as a betting man from whiskers and paper"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "Give him an arm back into his chair, Watson.",
+      "note": "has Watson steady Ryder"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "I have almost every link in my hands, and all the proofs which I could",
+      "note": "lays out the crime to Ryder"
+    },
+    {
+      "habit": "silent_concentration",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "measured tapping of Sherlock Holmes’ finger-tips upon the edge of the",
+      "note": "silent finger-tapping while deciding Ryder's fate"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "said Holmes, reaching up his hand for his clay",
+      "note": "reaches for his clay pipe as he reflects on the case"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "VII. The Adventure of the Blue Carbuncle",
+      "quote": "I am not retained by the police to supply their deficiencies.",
+      "note": "lets Ryder go, commuting a felony"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "Should it prove to be an interesting case, you would, I am",
+      "note": "wakes Watson to follow the case from the outset"
+    },
+    {
+      "habit": "reads_people",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "Sherlock Holmes ran her over with one",
+      "note": "quick all-comprehensive glance at Helen Stoner"
+    },
+    {
+      "habit": "reads_people",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "I observe the second half of a return ticket in the palm of",
+      "note": "deduces she came by train"
+    },
+    {
+      "habit": "reads_people",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "of your jacket is spattered with mud in no less than seven places.",
+      "note": "deduces dog-cart drive from mud on her sleeve"
+    },
+    {
+      "habit": "uses_records",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "case-book, which he consulted.",
+      "note": "consults his case-book about Farintosh"
+    },
+    {
+      "habit": "silent_concentration",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "Sherlock Holmes had been leaning back in his chair with his eyes closed",
+      "note": "listens with eyes closed"
+    },
+    {
+      "habit": "insists_on_details",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "“Pray be precise as to details,” said he.",
+      "note": "asks for precise details"
+    },
+    {
+      "habit": "reads_people",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "For answer Holmes pushed back the frill of black lace which fringed the",
+      "note": "reveals bruises; knows she is screening her stepfather"
+    },
+    {
+      "habit": "silent_concentration",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "during which Holmes leaned his chin upon his",
+      "note": "long silence, chin on hands, staring into fire"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "details which I should desire to know before I decide upon our course",
+      "note": "won't decide before more data"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "Excellent. You are not averse to this trip, Watson?",
+      "note": "brings Watson to Stoke Moran"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "Fancy his having the insolence to confound me with the official",
+      "note": "resents being confused with the official force"
+    },
+    {
+      "habit": "uses_records",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "I have seen the will of the deceased wife,” said he.",
+      "note": "researches the will at Doctors' Commons"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "revolver into your pocket. An Eley’s No. 2 is an excellent argument",
+      "note": "asks Watson to bring his revolver"
+    },
+    {
+      "habit": "silent_concentration",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "eyes, and his chin sunk upon his breast, buried in the deepest thought.",
+      "note": "deep thought on the drive"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "fellow should think we had come here as architects, or on some definite",
+      "note": "lets the driver think they are architects"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "walked slowly up and down the ill-trimmed lawn and examined with deep",
+      "note": "examines outside of windows"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "Then with his lens he tested the hinges, but",
+      "note": "tests shutters and hinges with lens"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "while his eyes travelled round and round and up and down, taking in",
+      "note": "sits silent taking in every detail of the room"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "He threw himself down upon his face with his lens in his hand",
+      "note": "crawls over floor with lens"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "Holmes walked slowly round and examined each and all of them with the",
+      "note": "examines Roylott's room"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "in front of the wooden chair and examined the seat of it with the",
+      "note": "examines chair seat"
+    },
+    {
+      "habit": "silent_concentration",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "liking to break in upon his thoughts before he roused himself from his",
+      "note": "walks the lawn lost in reverie"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "You must confine yourself to your room, on pretence of a headache,",
+      "note": "has Miss Stoner feign a headache and signal with lamp"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "“I should prefer to have clearer proofs before I speak.”",
+      "note": "refuses to tell client his conclusion"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "I have really some scruples as to taking you to-night.",
+      "note": "takes Watson on the dangerous night watch"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "I deduced a ventilator.",
+      "note": "explains deduction from the cigar smell"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "for goodness’ sake let us have a quiet pipe and turn our minds",
+      "note": "pipe while waiting before the climax"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "As we passed out he exchanged a few words with the landlord, explaining",
+      "note": "cover story to the landlord"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "Do not go asleep; your very life may depend upon it. Have your pistol",
+      "note": "Watson keeps pistol ready during vigil"
+    },
+    {
+      "habit": "ignores_food_sleep",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "How shall I ever forget that dreadful vigil?",
+      "note": "sits up all night in the dark"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "shows, my dear Watson, how dangerous it always is to reason from",
+      "note": "explains the case on the trip back"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "VIII. The Adventure of the Speckled Band",
+      "quote": "I had come to these conclusions before ever I had entered his room.",
+      "note": "chair, safe, milk, whipcord confirm theory"
+    },
+    {
+      "habit": "lounges_then_acts",
+      "story": "IX. The Adventure of the Engineer’s Thumb",
+      "quote": "Sherlock Holmes was, as I expected, lounging about his sitting-room in",
+      "note": "lounging in dressing-gown"
+    },
+    {
+      "habit": "uses_records",
+      "story": "IX. The Adventure of the Engineer’s Thumb",
+      "quote": "his dressing-gown, reading the agony column of _The Times_ and smoking",
+      "note": "reading the agony column"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "IX. The Adventure of the Engineer’s Thumb",
+      "quote": "his before-breakfast pipe, which was composed of all the plugs and",
+      "note": "before-breakfast pipe of old dottles"
+    },
+    {
+      "habit": "lounges_then_acts",
+      "story": "IX. The Adventure of the Engineer’s Thumb",
+      "quote": "Holmes sat in his big armchair with the weary, heavy-lidded expression",
+      "note": "languid look veiling a keen nature"
+    },
+    {
+      "habit": "insists_on_details",
+      "story": "IX. The Adventure of the Engineer’s Thumb",
+      "quote": "“Did you observe the colour?”",
+      "note": "questions about the horse"
+    },
+    {
+      "habit": "uses_records",
+      "story": "IX. The Adventure of the Engineer’s Thumb",
+      "quote": "shelf one of the ponderous commonplace books in which he placed his",
+      "note": "finds missing-engineer advertisement in commonplace book"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "IX. The Adventure of the Engineer’s Thumb",
+      "quote": "“I think I could lay my finger on it,” said Holmes quietly.",
+      "note": "keeps his answer back while others guess"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "IX. The Adventure of the Engineer’s Thumb",
+      "quote": "“You are all wrong.”",
+      "note": "corrects Inspector Bradstreet and the others"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "IX. The Adventure of the Engineer’s Thumb",
+      "quote": "Six out and six back. Nothing simpler.",
+      "note": "explains the fresh-horse reasoning"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "IX. The Adventure of the Engineer’s Thumb",
+      "quote": "mystery were it not for the soft mould, which told us a very plain",
+      "note": "footprints in soft mould show two carriers"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "Turn over those papers and arrange the extracts in their order",
+      "note": "has Watson arrange newspaper extracts"
+    },
+    {
+      "habit": "reads_people",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "noble lord has had the misfortune to get a smear of ink upon the outer",
+      "note": "deduces from the letter: quill pen, ink-smeared finger"
+    },
+    {
+      "habit": "uses_records",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "red-covered volume from a line of books of reference beside the",
+      "note": "looks up St. Simon in reference book"
+    },
+    {
+      "habit": "lounges_then_acts",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "“Anything else?” asked Holmes, yawning.",
+      "note": "yawns at press cuttings, then starts at the vanished bride"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "Do not dream of going, Watson, for I",
+      "note": "wants Watson as witness"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "“That is a detail which I shall speedily supply.”",
+      "note": "says he has solved it but won't say how"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "shall have a whisky and soda and a cigar after all this",
+      "note": "cigar after cross-questioning"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "I had formed my conclusions as to the case before",
+      "note": "had formed conclusions before the client came"
+    },
+    {
+      "habit": "uses_records",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "I have notes of several similar cases, though none, as I remarked",
+      "note": "draws on knowledge of parallel cases"
+    },
+    {
+      "habit": "reads_people",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "“And very wet it seems to have made you,” said Holmes laying his hand",
+      "note": "notes Lestrade's wet jacket"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "“Have you dragged the basin of Trafalgar Square fountain?” he asked.",
+      "note": "mocks Lestrade's dragging of the Serpentine"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "said my friend, blowing blue rings into the air.",
+      "note": "smoking while Lestrade argues"
+    },
+    {
+      "habit": "lounges_then_acts",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "He took up the paper in a listless way, but his",
+      "note": "listless, then instantly riveted by hotel bill"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "Very likely not. It is most important, all the same.",
+      "note": "won't explain bill to Lestrade"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "Simon is a myth. There is not, and there never has been, any such",
+      "note": "cryptic hint instead of explanation"
+    },
+    {
+      "habit": "lounges_then_acts",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "He had hardly shut the door behind him when Holmes rose to put on his",
+      "note": "springs up to go out the moment Lestrade leaves"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "the result when viewed, for instance, by Mr. Lestrade of Scotland",
+      "note": "contrasts with Lestrade's view"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "From the first, two facts were very obvious to me, the one that the",
+      "note": "explains reasoning to Watson"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "his hands the value of which he did not himself know.",
+      "note": "Lestrade held the clue unknowingly"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "By the select prices.",
+      "note": "explains hotel deduction"
+    },
+    {
+      "habit": "uses_records",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "visited in Northumberland Avenue, I learned by an inspection of the",
+      "note": "checks hotel register"
+    },
+    {
+      "habit": "music",
+      "story": "X. The Adventure of the Noble Bachelor",
+      "quote": "your chair up and hand me my violin, for the only problem we have still",
+      "note": "asks for his violin after case"
+    },
+    {
+      "habit": "lounges_then_acts",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "My friend rose lazily from his armchair and stood with his hands in the",
+      "note": "lazily rises at the window before the case"
+    },
+    {
+      "habit": "silent_concentration",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "Sherlock Holmes sat silent for some few minutes, with his brows knitted",
+      "note": "silent thought, eyes on the fire"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "A likely story! As if a man bent on felony would slam his door so as",
+      "note": "scorns police explanation of the noise"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "this matter really strikes very much deeper than either you or the",
+      "note": "case deeper than police think"
+    },
+    {
+      "habit": "insists_on_details",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "an hour to glancing a little more closely into details.",
+      "note": "goes to Streatham to look into details"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "My friend insisted upon my accompanying them in their expedition, which",
+      "note": "insists Watson comes"
+    },
+    {
+      "habit": "silent_concentration",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "breast and his hat drawn over his eyes, sunk in the deepest thought.",
+      "note": "deep thought on the journey"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "standing at the door and walked slowly all round the house, across the",
+      "note": "walks round the house examining"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "opened and made a very careful examination of the sill with his",
+      "note": "examines window sill with lens"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "bureau first and looked hard at the lock.",
+      "note": "examines bureau lock"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "Holmes suddenly bent his strength upon it, but without",
+      "note": "tests whether the coronet can be broken quietly"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "He went alone, at his own request, for he explained that any",
+      "note": "examines outside alone to avoid extra footmarks"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "and his features as inscrutable as ever.",
+      "note": "inscrutable after investigation"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "to sound him upon the point, but he always glided away to some other",
+      "note": "evades Watson's questions"
+    },
+    {
+      "habit": "disguise",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "chamber and was down again in a few minutes dressed as a common loafer.",
+      "note": "disguised as a loafer"
+    },
+    {
+      "habit": "ignores_food_sleep",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "the joint upon the sideboard, sandwiched it between two rounds of",
+      "note": "makes a rude sandwich and rushes off"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "I will do so, and I will show you the steps by which I reached it.",
+      "note": "explains steps to Holder"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "lane a very long and complex story was written in the snow in front of",
+      "note": "reads footprints in snow of stable lane"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "It is an old maxim of mine that when you have excluded the impossible,",
+      "note": "states his elimination maxim"
+    },
+    {
+      "habit": "informants_and_agents",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "an acquaintance with his valet, learned that his master had cut his",
+      "note": "gets information from Burnwell's valet; buys his old shoes"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "for I saw that a prosecution must be avoided to avert scandal, and I",
+      "note": "avoids prosecution; deals privately with Burnwell"
+    },
+    {
+      "habit": "ignores_food_sleep",
+      "story": "XI. The Adventure of the Beryl Coronet",
+      "quote": "eventually got to my bed about two o’clock,",
+      "note": "works until 2 a.m."
+    },
+    {
+      "habit": "uses_records",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "tossing aside the advertisement sheet of _The Daily Telegraph_, “it is",
+      "note": "reading advertisement sheet"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "the long cherry-wood pipe which was wont",
+      "note": "chooses cherry-wood pipe for disputatious mood"
+    },
+    {
+      "habit": "reads_people",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "wont, my thoughts rather than my words.",
+      "note": "answers Watson's unspoken thoughts"
+    },
+    {
+      "habit": "uses_records",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "into the advertisement columns of a succession of papers until at last,",
+      "note": "searching advertisement columns all morning"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "puffing at his long pipe and gazing down into the fire",
+      "note": "puffs pipe gazing into fire"
+    },
+    {
+      "habit": "reads_people",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "He looked her over in his searching fashion,",
+      "note": "searching look at Miss Hunter"
+    },
+    {
+      "habit": "fingertips_together",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "and then composed himself, with his lids drooping and his finger-tips",
+      "note": "composes himself, finger-tips together (next line), to listen to Miss Hunter"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "Ah, I have no data. I cannot tell.",
+      "note": "refuses to theorise without data"
+    },
+    {
+      "habit": "silent_concentration",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "hour on end, with knitted brows and an abstracted air, but he swept the",
+      "note": "sits brooding for half-hours"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "I can’t make bricks without clay.",
+      "note": "won't theorise without data"
+    },
+    {
+      "habit": "chemistry",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "all-night chemical researches which he frequently indulged in, when I",
+      "note": "all-night chemical researches"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "Just look up the trains in Bradshaw",
+      "note": "sets Watson to look up trains"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "“Will you come with me?” asked Holmes, glancing up.",
+      "note": "asks Watson along"
+    },
+    {
+      "habit": "chemistry",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "analysis of the acetones, as we may need to be at our best in the",
+      "note": "postpones acetone analysis"
+    },
+    {
+      "habit": "uses_records",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "Holmes had been buried in the morning papers all the",
+      "note": "reads morning papers on the train"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "I have devised seven separate explanations, each of which would cover",
+      "note": "won't choose a theory until he has more facts"
+    },
+    {
+      "habit": "silent_concentration",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "legs out towards the fire and composed himself to listen.",
+      "note": "settles himself to listen"
+    },
+    {
+      "habit": "insists_on_details",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "I am glad of all details,” remarked my friend",
+      "note": "wants all details, relevant or not"
+    },
+    {
+      "habit": "silent_concentration",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "friend rose now and paced up and down the room, his hands in his",
+      "note": "paces the room in grave thought"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "you could send her into the cellar on some errand, and then turn the",
+      "note": "has Miss Hunter lock Mrs. Toller in the cellar"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "personate someone, and the real person is imprisoned in this chamber.",
+      "note": "explains the impersonation theory"
+    },
+    {
+      "habit": "reads_people",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "real insight into the character of parents by studying their children.",
+      "note": "reads parents through the cruel child"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "Now, Watson, put your shoulder to",
+      "note": "Watson helps break the door"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "Through the skylight. We shall soon see how he managed it.",
+      "note": "climbs to roof and finds ladder"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "as well for you to have your pistol ready.",
+      "note": "asks Watson to ready pistol"
+    },
+    {
+      "habit": "reads_people",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "said Holmes, looking keenly at her. “It is clear that Mrs. Toller",
+      "note": "reads Mrs. Toller's knowledge"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "us makes the matter fairly clear, and that I can deduce all that",
+      "note": "deduces remaining facts"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "XII. The Adventure of the Copper Beeches",
+      "quote": "_locus standi_ now is rather a questionable one.",
+      "note": "leaves without involving the police"
+    }
+  ],
+  "new_keys": {
+    "fingertips_together": "Holmes presses his fingertips together while listening or reasoning (key introduced by the I-VI agent; reused here)",
+    "silent_concentration": "sits or walks in silent, absorbed thought: eyes closed or lids drooping while listening, finger-tips together or tapping, chin on hands/breast staring into the fire, pacing, lost in reverie",
+    "insists_on_details": "insists on precise or seemingly trivial details from clients and witnesses, whether or not they seem relevant"
+  }
+}

@@ -157,6 +157,45 @@
   #instr-note { flex: 1; color: var(--muted); }
   #instr-note.warn { color: var(--warn); }
   .hint label.disabled { color: var(--muted); cursor: not-allowed; }
+
+  /* ---------- Research ---------- */
+  #research-form {
+    display: none; padding: 12px 20px; border-bottom: 1px solid var(--border);
+    background: var(--panel); font-size: 13px;
+  }
+  #research-form.open { display: block; }
+  #research-form .grid { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; align-items: center; max-width: 620px; }
+  #research-form select, #research-form input {
+    font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 4px 6px;
+  }
+  #research-form p { margin: 8px 0 0; color: var(--muted); }
+  .activity.live { font-style: italic; }
+  .report {
+    border: 1px solid var(--border); border-radius: 12px; background: var(--panel);
+    padding: 14px 16px; margin: 0 0 18px;
+  }
+  .report h3 { margin: 0 0 8px; font-size: 14px; color: var(--muted); font-weight: 600; }
+  .report .answer > :first-child { margin-top: 0; }
+  .report .answer > :last-child { margin-bottom: 0; }
+  a.cite {
+    color: var(--accent); text-decoration: none; font-size: 0.85em; font-weight: 600;
+    padding: 0 2px; border-radius: 3px;
+  }
+  a.cite:hover { background: var(--hover); }
+  .report details { margin-top: 10px; }
+  .report summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  .evidence { list-style: none; margin: 8px 0 0; padding: 0; }
+  .evidence li {
+    padding: 7px 9px; border-radius: 8px; cursor: pointer; font-size: 13.5px; margin-bottom: 4px;
+    border-left: 3px solid var(--accent); background: var(--bg);
+  }
+  .evidence li.uncited { border-left-color: var(--border); opacity: 0.75; }
+  .evidence li:hover, .evidence li.flash { background: var(--hover); }
+  .evidence .src { color: var(--muted); font-size: 12px; margin-bottom: 2px; }
+  .report .flags { color: var(--warn); font-size: 12.5px; margin: 8px 0 0; padding-left: 18px; }
+  .report .stats { color: var(--muted); font-size: 12px; margin-top: 8px; }
+  mark#hl { background: color-mix(in srgb, var(--accent) 35%, transparent); color: inherit; border-radius: 3px; padding: 1px 0; }
   #hf-form .line { display: flex; gap: 8px; align-items: center; }
   #hf-ref {
     flex: 1; font: inherit; font-size: 14px; color: var(--text); background: var(--bg);
@@ -307,7 +346,26 @@
       <span id="fit"></span>
       <button class="link" id="remove-model" style="display:none">Remove this model</button>
       <button class="link" id="instr-open" title="Standing instructions (system prompt)">⚙ Instructions</button>
+      <button class="link" id="research-open" title="Models used by the research agents">🔬 Research</button>
       <div id="pull"><span id="pull-text"></span><div class="bar"><div></div></div></div>
+    </div>
+    <div id="research-form">
+      <div class="grid">
+        <label for="rs-finder">Finder model</label><select id="rs-finder"></select>
+        <label for="rs-researcher">Researcher model</label><select id="rs-researcher"></select>
+        <label for="rs-workers">Parallel finders</label><input id="rs-workers" type="number" min="1" max="16" style="width: 70px">
+      </div>
+      <p>Finders read every passage of your documents and point at the relevant sentences; the app copies
+        them out exactly, and the researcher plans the search and writes the cited answer. The default
+        finder is Qwen3 4B, the best in our benchmark. The default researcher, when downloaded, is the
+        Qwen3.5 9B (Q4_K_M) we benchmarked: smaller researchers such as Qwen3 4B answer less accurately and
+        can be misled by instructions planted in a document. “Same as chat” uses the current model, which
+        avoids swapping models in and out of memory.
+        Parallel finders above Ollama's <span id="rs-parallel"></span> parallel slots just wait in line.</p>
+      <div class="line" style="display:flex; gap:8px; margin-top:8px">
+        <button class="small-btn" id="rs-save">Save</button>
+        <button class="icon-btn" id="rs-cancel" title="Close">✕</button>
+      </div>
     </div>
     <div id="instr-form">
       <textarea id="instr-text" placeholder="Instructions for this chat, e.g. “Write in British English. Keep a warm, plain tone. Never use em dashes.”"></textarea>
@@ -448,10 +506,98 @@
     if ($("#instr-form").classList.contains("open")) loadInstructions(true);
     logEl.innerHTML = "";
     if (!view.messages.length) showWelcome();
-    for (const m of view.messages) addMessage(m.role, { text: m.content, html: m.html, index: m.index });
+    for (const m of view.messages) {
+      if (m.role === "report") addReport(m.report);
+      else addMessage(m.role, { text: m.content, html: m.html, index: m.index });
+    }
     scrollDown(true);
     refreshThreads();
   }
+
+  // ---------- research report card ----------
+  function addReport(r) {
+    const card = document.createElement("div");
+    card.className = "report";
+    const h = document.createElement("h3");
+    h.textContent = (r.kind === "summary" ? "📄 " : "🔬 ") + r.question;
+    const answer = document.createElement("div");
+    answer.className = "answer bubble";
+    answer.innerHTML = r.answer_html;  // rendered + escaped in Python; [E#] made into links there
+    card.append(h, answer);
+
+    const items = {};
+    if (r.evidence.length) {
+      const det = document.createElement("details");
+      det.open = r.evidence.length <= 8;
+      const sum = document.createElement("summary");
+      const cited = r.evidence.filter((e) => e.cited).length;
+      sum.textContent = `Evidence: ${r.evidence.length} passage(s), exact excerpts from your documents (${cited} cited)`;
+      const ol = document.createElement("ol");
+      ol.className = "evidence";
+      for (const e of r.evidence) {
+        const li = document.createElement("li");
+        if (!e.cited) li.classList.add("uncited");
+        const src = document.createElement("div");
+        src.className = "src";
+        src.textContent = `[E${e.n}] ${e.title} · p. ${e.page}${e.cited ? "" : " · not cited"}`;
+        const q = document.createElement("div");
+        q.textContent = `“${e.quote}”`;
+        li.append(src, q);
+        li.title = "Open the document at this passage";
+        li.onclick = () => openViewer(e.doc_id, e.start, e.end);
+        ol.appendChild(li);
+        items[e.n] = li;
+      }
+      det.append(sum, ol);
+      card.appendChild(det);
+    }
+    if (r.flags && r.flags.length) {
+      const ul = document.createElement("ul");
+      ul.className = "flags";
+      for (const f of r.flags) { const li = document.createElement("li"); li.textContent = f; ul.appendChild(li); }
+      card.appendChild(ul);
+    }
+    const stats = document.createElement("div");
+    stats.className = "stats";
+    stats.textContent = r.stats + (r.note ? ` · saved as draft “${r.note}”` : "");
+    card.appendChild(stats);
+
+    for (const a of answer.querySelectorAll("a.cite")) {
+      a.onclick = (ev) => {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const li = items[a.dataset.n];
+        if (!li) return;
+        li.closest("details").open = true;
+        li.classList.add("flash");
+        setTimeout(() => li.classList.remove("flash"), 1200);
+        li.click();
+      };
+    }
+    logEl.appendChild(card);
+    return card;
+  }
+
+  let progressLine = null;
+  function clearProgress() { if (progressLine) { progressLine.remove(); progressLine = null; } }
+  window.onProgress = (text) => {
+    if (!progressLine) {
+      progressLine = document.createElement("div");
+      progressLine.className = "activity live";
+      const anchor = liveBubble ? liveBubble.parentElement : null;
+      logEl.insertBefore(progressLine, anchor);
+    }
+    progressLine.textContent = text;
+    scrollDown(false);
+  };
+  window.onResearch = (r) => {
+    clearProgress();
+    if (liveBubble) { liveBubble.classList.remove("typing"); dropEmptyLive(); }
+    addReport(r);
+    newLiveBubble();
+    scrollDown(false);
+    refreshLibrary();
+  };
 
   function setBusy(b) {
     busy = b;
@@ -549,8 +695,8 @@
     section("Drafts", drafts, "Drafts the assistant writes appear here.");
   }
 
-  async function openViewer(id) {
-    const d = await api.view_document(id);
+  async function openViewer(id, start, end) {
+    const d = await api.view_document(id, start ?? null, end ?? null);
     if (d.error) return banner(d.error);
     viewerDoc = d.id;
     $("#viewer-title").textContent = d.title;
@@ -559,6 +705,8 @@
     if (d.html != null) { body.className = "body bubble"; body.innerHTML = d.html; }
     else { body.className = "body plain"; body.textContent = d.text; }
     $("#viewer").classList.add("open");
+    const hl = body.querySelector("#hl");
+    if (hl) hl.scrollIntoView({ block: "center" }); else body.scrollTop = 0;
     refreshLibrary();
   }
   $("#viewer-close").onclick = () => { $("#viewer").classList.remove("open"); viewerDoc = null; refreshLibrary(); };
@@ -680,6 +828,41 @@
     banner(r.text ? "Instructions saved for this chat. They apply from your next message." : "Instructions cleared for this chat.", { info: true });
   };
 
+  async function loadResearchSettings() {
+    const s = await api.research_settings();
+    for (const [id, cur] of [["#rs-finder", s.finder_model], ["#rs-researcher", s.researcher_model]]) {
+      const sel = $(id);
+      sel.innerHTML = "";
+      const same = document.createElement("option");
+      same.value = "";
+      const dflt = id === "#rs-finder" ? s.default_finder : s.default_researcher;
+      same.textContent = dflt ? `Default (${dflt})` : "Same as chat model";
+      sel.appendChild(same);
+      for (const tag of s.installed) {
+        const o = document.createElement("option");
+        o.value = tag;
+        const m = models.models.find((x) => x.tag === tag);
+        o.textContent = m ? m.label.replace(/^🤗 /, "") + (tag.startsWith("hf.co") ? ` (${tag.split(":").pop()})` : "") : tag;
+        sel.appendChild(o);
+      }
+      sel.value = cur || "";
+    }
+    $("#rs-workers").value = s.workers;
+    $("#rs-parallel").textContent = s.server_parallel;
+  }
+  $("#research-open").onclick = async () => {
+    const f = $("#research-form");
+    if (f.classList.toggle("open")) await loadResearchSettings();
+  };
+  $("#rs-cancel").onclick = () => $("#research-form").classList.remove("open");
+  $("#rs-save").onclick = async () => {
+    const r = await api.set_research_settings($("#rs-finder").value || null, $("#rs-researcher").value || null,
+                                              parseInt($("#rs-workers").value, 10) || null);
+    if (r.error) return banner(r.error);
+    $("#research-form").classList.remove("open");
+    banner("Research settings saved.", { info: true });
+  };
+
   async function addHF() {
     const ref = $("#hf-ref").value.trim();
     if (!ref) return;
@@ -766,6 +949,7 @@
     scrollDown(false);
   };
   window.onActivity = (label) => {
+    clearProgress();
     if (liveBubble) { liveBubble.classList.remove("typing"); dropEmptyLive(); }
     addMessage("activity", { text: label });
     newLiveBubble();
@@ -773,6 +957,7 @@
     if (/Created|Revised/.test(label)) refreshLibrary();
   };
   window.onDone = ({ html, index, status, fit }) => {
+    clearProgress();
     if (liveBubble) {
       liveBubble.classList.remove("typing");
       if (html) {
@@ -792,6 +977,7 @@
     input.focus();
   };
   window.onError = ({ message }) => {
+    clearProgress();
     if (liveBubble) { liveBubble.classList.remove("typing"); dropEmptyLive(); }
     const err = document.createElement("div");
     err.className = "error";
@@ -809,7 +995,7 @@
   // ---------- misc wiring ----------
   document.addEventListener("click", (e) => {
     const a = e.target.closest("a[href]");
-    if (!a) return;
+    if (!a || a.classList.contains("cite")) return;  // citations have their own handler
     e.preventDefault();
     api && api.open_link(a.href);
   });

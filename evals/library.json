@@ -1,0 +1,309 @@
+{
+  "about": "The library round: the three books in full (about 10x the pipeline corpus), the needles and questions of questions.json, plus these. bridge: chains whose later step shares no words with the question (findable only through the earlier answer). context: the fact sentence names nobody; the sentence before it says who (a lone sentence can't answer). aggregate: open questions answered by many passages, scored against a labelled list of cases (evals/aggregate/*.json) as if each quote were a planted fact.",
+  "documents": {
+    "holmes": {
+      "gutenberg_id": 1661
+    },
+    "alice": {
+      "gutenberg_id": 11
+    },
+    "frankenstein": {
+      "gutenberg_id": 84
+    }
+  },
+  "needles": {
+    "B1a": {
+      "doc": "alice",
+      "at": 0.66,
+      "text": "The Mock Turtle's cracked shell had once been mended by a tinker named Silas Crane."
+    },
+    "B1b": {
+      "doc": "frankenstein",
+      "at": 0.52,
+      "text": "Silas Crane played the oboe for the cathedral at Geneva, for a few francs a week."
+    },
+    "B2a": {
+      "doc": "holmes",
+      "at": 0.44,
+      "text": "The lens Holmes carried that year had been ground for him by an optician called Hester Vane."
+    },
+    "B2b": {
+      "doc": "frankenstein",
+      "at": 0.27,
+      "text": "Hester Vane had spent her girlhood at Ingolstadt, keeping bees behind her father's shop."
+    },
+    "B3a": {
+      "doc": "frankenstein",
+      "at": 0.83,
+      "text": "The lantern Elizabeth carried down to the boathouse was a present from a glazier named Owen Pryce."
+    },
+    "B3b": {
+      "doc": "holmes",
+      "at": 0.62,
+      "text": "Owen Pryce had once shared rooms in Lambeth with a young violinist, Clara Mott."
+    },
+    "B3c": {
+      "doc": "alice",
+      "at": 0.47,
+      "text": "Clara Mott taught the Dormouse to hum, though it always fell asleep before the end."
+    },
+    "P1": {
+      "doc": "holmes",
+      "at": 0.33,
+      "text": "Under his arm was a jar of quince preserve, which he set down beside the coal-scuttle without a word.",
+      "lead": "Inspector Gregson called at Baker Street on the Thursday."
+    },
+    "P2": {
+      "doc": "alice",
+      "at": 0.36,
+      "text": "Every spring a parcel of pepper arrived from her, wrapped in old sheet music.",
+      "lead": "The Duchess's cook had a sister who lived by the sea."
+    },
+    "P3": {
+      "doc": "frankenstein",
+      "at": 0.18,
+      "text": "In his rooms hung a portrait of a woman nobody dared ask about, painted in green and gold.",
+      "lead": "Clerval's tutor at Ingolstadt was a quiet man named Professor Lindqvist."
+    }
+  },
+  "aggregates": {
+    "alice_encounters": {
+      "file": "aggregate/alice_encounters.json",
+      "doc": "alice"
+    },
+    "holmes_habits": {
+      "files": [
+        "aggregate/holmes_habits_1-6.json",
+        "aggregate/holmes_habits_7-12.json"
+      ],
+      "doc": "holmes"
+    }
+  },
+  "questions": [
+    {
+      "id": "b1",
+      "kind": "bridge",
+      "question": "How did the man who mended the Mock Turtle's shell earn extra money?",
+      "needles": [
+        "B1a",
+        "B1b"
+      ],
+      "expect": [
+        "oboe"
+      ]
+    },
+    {
+      "id": "b2",
+      "kind": "bridge",
+      "question": "What creatures did the maker of Holmes's lens look after in her youth?",
+      "needles": [
+        "B2a",
+        "B2b"
+      ],
+      "expect": [
+        "bees"
+      ]
+    },
+    {
+      "id": "b3",
+      "kind": "bridge",
+      "question": "Whom did the former housemate of the man who made Elizabeth's lantern give lessons to?",
+      "needles": [
+        "B3a",
+        "B3b",
+        "B3c"
+      ],
+      "expect": [
+        "dormouse"
+      ]
+    },
+    {
+      "id": "p1",
+      "kind": "context",
+      "question": "What did Inspector Gregson bring with him to Baker Street on the Thursday?",
+      "needles": [
+        "P1"
+      ],
+      "expect": [
+        "quince"
+      ]
+    },
+    {
+      "id": "p2",
+      "kind": "context",
+      "question": "What did the sister of the Duchess's cook send each year?",
+      "needles": [
+        "P2"
+      ],
+      "expect": [
+        "pepper"
+      ]
+    },
+    {
+      "id": "p3",
+      "kind": "context",
+      "question": "What was displayed in the lodgings of the man who tutored Clerval?",
+      "needles": [
+        "P3"
+      ],
+      "expect": [
+        "portrait"
+      ]
+    },
+    {
+      "id": "a1",
+      "kind": "aggregate",
+      "cases": "alice_encounters",
+      "question": "Is Alice more likely to befriend, or to be at odds with, the people and creatures she meets in Wonderland?",
+      "min_kinds": 1,
+      "answer_kinds": {
+        "at odds": [
+          "at odds",
+          "hostil",
+          "conflict",
+          "quarrel",
+          "rude",
+          "argu",
+          "clash",
+          "friction",
+          "antagon"
+        ]
+      }
+    },
+    {
+      "id": "a2",
+      "kind": "aggregate",
+      "cases": "holmes_habits",
+      "question": "What are Sherlock Holmes's common habits when investigating a case?",
+      "min_kinds": 6,
+      "answer_kinds": {
+        "disguise": [
+          "disguis"
+        ],
+        "examines_scene": [
+          "lens",
+          "magnif",
+          "footprint",
+          "examines the",
+          "examining the",
+          "close examination",
+          "inspects",
+          "on his knees",
+          "hands and knees"
+        ],
+        "reads_people": [
+          "appearance",
+          "small details",
+          "from details",
+          "deduces",
+          "deduction",
+          "infers"
+        ],
+        "smokes_while_thinking": [
+          "pipe",
+          "tobacco",
+          "smok"
+        ],
+        "music": [
+          "violin",
+          "music",
+          "concert"
+        ],
+        "ignores_food_sleep": [
+          "sleep",
+          "meal",
+          "food",
+          "all night",
+          "fasting"
+        ],
+        "withholds_conclusions": [
+          "withhold",
+          "keeps his conclusions",
+          "keeps his reasoning",
+          "reticen",
+          "refuses to theori",
+          "won't theori",
+          "before he has data",
+          "secretive"
+        ],
+        "explains_reasoning": [
+          "explains his",
+          "explain his",
+          "explains the",
+          "chain of reason",
+          "walks watson through"
+        ],
+        "uses_records": [
+          "index",
+          "newspaper",
+          "records",
+          "agony column",
+          "commonplace",
+          "reference book"
+        ],
+        "sets_trap_or_ruse": [
+          "trap",
+          "ruse",
+          "trick",
+          "false alarm",
+          "pretext",
+          "decoy"
+        ],
+        "relies_on_watson": [
+          "revolver",
+          "watson's help",
+          "asks watson",
+          "brings watson",
+          "takes watson",
+          "watson accompan",
+          "with watson"
+        ],
+        "works_apart_from_police": [
+          "police",
+          "lestrade",
+          "scotland yard",
+          "official"
+        ],
+        "informants_and_agents": [
+          "informant",
+          "street arab",
+          "irregulars",
+          "agents",
+          "paid helper",
+          "cabm"
+        ],
+        "lounges_then_acts": [
+          "languor",
+          "lazy",
+          "idle",
+          "bursts of energy",
+          "lethargy",
+          "inactivity",
+          "lounging"
+        ],
+        "chemistry": [
+          "chemi",
+          "experiment"
+        ],
+        "fingertips_together": [
+          "finger-tips",
+          "fingertips"
+        ],
+        "silent_concentration": [
+          "silen",
+          "eyes closed",
+          "closed eyes",
+          "meditat",
+          "deep thought",
+          "absorbed",
+          "reverie",
+          "concentrat"
+        ],
+        "insists_on_details": [
+          "detail",
+          "precise"
+        ]
+      }
+    }
+  ]
+}

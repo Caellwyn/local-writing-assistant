@@ -1,0 +1,1054 @@
+{
+  "source": "evals/.corpus/raw/pg1661.txt (Project Gutenberg #1661, The Adventures of Sherlock Holmes; text between START/END markers)",
+  "stories": [
+    "I. A Scandal in Bohemia",
+    "II. The Red-Headed League",
+    "III. A Case of Identity",
+    "IV. The Boscombe Valley Mystery",
+    "V. The Five Orange Pips",
+    "VI. The Man with the Twisted Lip"
+  ],
+  "instances": [
+    {
+      "habit": "lounges_then_acts",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "alternating from week to week between cocaine and ambition,",
+      "note": "alternates drug-drowsiness with fierce energy"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "mysteries which had been abandoned as hopeless by the official police.",
+      "note": "clears up cases the police gave up"
+    },
+    {
+      "habit": "reads_people",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "“I think, Watson, that you have put",
+      "note": "deduces Watson's weight gain and return to practice"
+    },
+    {
+      "habit": "reads_people",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "my eyes tell me that on the inside",
+      "note": "scored shoe leather reveals wet weather and careless servant"
+    },
+    {
+      "habit": "reads_people",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "iodoform, with a black mark of nitrate of silver upon his right",
+      "note": "deduces Watson is practising medicine"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "I could not help laughing at the ease with which he explained his",
+      "note": "explains how he deduced Watson's doings"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "“Quite so,” he answered, lighting a cigarette, and throwing himself",
+      "note": "lights cigarette while discoursing on observation"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "It is a capital mistake to theorise before one has",
+      "note": "refuses to theorise without data"
+    },
+    {
+      "habit": "uses_records",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "glance at our Continental Gazetteer.",
+      "note": "looks up Egria in the gazetteer"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "he sent up a great blue triumphant cloud",
+      "note": "triumphant cigarette smoke on deducing the paper's origin"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "Stay where you are. I am lost without my Boswell.",
+      "note": "insists Watson stay for the interview"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "Never mind him. I may want your help, and so may he.",
+      "note": "wants Watson's help with the client"
+    },
+    {
+      "habit": "lounges_then_acts",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "Our visitor glanced with some apparent surprise at the languid,",
+      "note": "languid, eyes-closed manner before the King"
+    },
+    {
+      "habit": "uses_records",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "“Kindly look her up in my index, Doctor,” murmured Holmes without",
+      "note": "Irene Adler looked up in his index"
+    },
+    {
+      "habit": "uses_records",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "opening his eyes. For many years he had adopted a system of docketing",
+      "note": "his system of docketing paragraphs"
+    },
+    {
+      "habit": "disguise",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "friend’s amazing powers in the use of disguises, I had to look three",
+      "note": "returns as a drunken-looking groom"
+    },
+    {
+      "habit": "disguise",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "character of a groom out of work.",
+      "note": "groom out of work to gather gossip"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "examined it closely from every point of view, but without noting",
+      "note": "examines Briony Lodge closely"
+    },
+    {
+      "habit": "informants_and_agents",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "the ostlers a hand in rubbing down their horses, and received in",
+      "note": "gets information from ostlers at the mews"
+    },
+    {
+      "habit": "informants_and_agents",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "See the advantages of a cabman as a",
+      "note": "cabmen as confidants for information"
+    },
+    {
+      "habit": "ignores_food_sleep",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "have been too busy to think of food, and I am likely to be busier still",
+      "note": "too busy to think of food"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "this evening. By the way, Doctor, I shall want your co-operation.",
+      "note": "asks Watson's co-operation, even breaking the law"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "“I was sure that I might rely on you.”",
+      "note": "relies on Watson"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "“You must leave that to me. I have already arranged what is to occur.",
+      "note": "won't reveal the plan"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "will open. You are to station yourself close to that open window.",
+      "note": "gives Watson a task in the plan"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "you to throw, and will, at the same time, raise the cry of fire. You",
+      "note": "false fire alarm planned"
+    },
+    {
+      "habit": "disguise",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "character of an amiable and simple-minded Nonconformist clergyman. His",
+      "note": "disguised as a Nonconformist clergyman"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "alarm. Slipping through the shouting crowd I made my way to the corner",
+      "note": "false alarm staged at Briony Lodge"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "“I do not wish to make a mystery,” said he, laughing. “The matter was",
+      "note": "explains the ruse afterwards"
+    },
+    {
+      "habit": "informants_and_agents",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "an accomplice. They were all engaged for the evening.",
+      "note": "street crowd were paid accomplices"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "face, and became a piteous spectacle. It is an old trick.",
+      "note": "fakes injury with red paint"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "I. A Scandal in Bohemia",
+      "quote": "“It was all-important. When a woman thinks that her house is on fire,",
+      "note": "fire alarm makes her reveal the hiding place"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "II. The Red-Headed League",
+      "quote": "“Not at all. This gentleman, Mr. Wilson, has been my partner and helper",
+      "note": "keeps Watson in the consultation"
+    },
+    {
+      "habit": "fingertips_together",
+      "story": "II. The Red-Headed League",
+      "quote": "his fingertips together, as was his custom when in judicial moods.",
+      "note": "fingertips together in judicial mood"
+    },
+    {
+      "habit": "reads_people",
+      "story": "II. The Red-Headed League",
+      "quote": "facts that he has at some time done manual labour, that he takes snuff,",
+      "note": "reads Jabez Wilson's history from appearance"
+    },
+    {
+      "habit": "reads_people",
+      "story": "II. The Red-Headed League",
+      "quote": "“Your hands, my dear sir. Your right hand is quite a size larger than",
+      "note": "manual labour from hand size"
+    },
+    {
+      "habit": "reads_people",
+      "story": "II. The Red-Headed League",
+      "quote": "“The fish that you have tattooed immediately above your right wrist",
+      "note": "China from a tattoo"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "II. The Red-Headed League",
+      "quote": "“I begin to think, Watson,” said Holmes, “that I make a mistake in",
+      "note": "explains, then regrets explaining"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "II. The Red-Headed League",
+      "quote": "You will first make a note, Doctor, of the paper",
+      "note": "asks Watson to note the paper and date"
+    },
+    {
+      "habit": "reads_people",
+      "story": "II. The Red-Headed League",
+      "quote": "much,” said he. “Have you ever observed that his ears are pierced for",
+      "note": "identifies Spaulding from small details"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "II. The Red-Headed League",
+      "quote": "“To smoke,” he answered. “It is quite a three pipe problem, and I beg",
+      "note": "three pipe problem"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "II. The Red-Headed League",
+      "quote": "there he sat with his eyes closed and his black clay pipe thrusting out",
+      "note": "silent with clay pipe"
+    },
+    {
+      "habit": "lounges_then_acts",
+      "story": "II. The Red-Headed League",
+      "quote": "he had dropped asleep, and indeed was nodding myself, when he suddenly",
+      "note": "seems asleep then springs up decided"
+    },
+    {
+      "habit": "music",
+      "story": "II. The Red-Headed League",
+      "quote": "“Sarasate plays at the St. James’s Hall this afternoon,” he remarked.",
+      "note": "goes to Sarasate concert"
+    },
+    {
+      "habit": "music",
+      "story": "II. The Red-Headed League",
+      "quote": "Italian or French. It is introspective, and I want to introspect. Come",
+      "note": "German music to introspect"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "II. The Red-Headed League",
+      "quote": "Holmes stopped in front of it with his head on one side and looked it",
+      "note": "studies the pawnbroker's and street"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "II. The Red-Headed League",
+      "quote": "and, having thumped vigorously upon the pavement with his stick two or",
+      "note": "beats the pavement to test for cellar"
+    },
+    {
+      "habit": "reads_people",
+      "story": "II. The Red-Headed League",
+      "quote": "“The knees of his trousers.”",
+      "note": "looks at assistant's trouser knees"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "II. The Red-Headed League",
+      "quote": "“My dear doctor, this is a time for observation, not for talk. We are",
+      "note": "won't explain on the spot"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "II. The Red-Headed League",
+      "quote": "It is a hobby of mine to have an exact knowledge of London. There is",
+      "note": "memorises the order of the houses"
+    },
+    {
+      "habit": "music",
+      "story": "II. The Red-Headed League",
+      "quote": "some play. A sandwich and a cup of coffee, and then off to violin-land,",
+      "note": "off to violin-land"
+    },
+    {
+      "habit": "music",
+      "story": "II. The Red-Headed League",
+      "quote": "My friend was an enthusiastic musician, being himself not only a very",
+      "note": "enthusiastic musician and composer"
+    },
+    {
+      "habit": "lounges_then_acts",
+      "story": "II. The Red-Headed League",
+      "quote": "extreme languor to devouring energy; and, as I knew well, he was never",
+      "note": "swing from languor to devouring energy"
+    },
+    {
+      "habit": "lounges_then_acts",
+      "story": "II. The Red-Headed League",
+      "quote": "so truly formidable as when, for days on end, he had been lounging in",
+      "note": "most formidable after days of lounging"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "II. The Red-Headed League",
+      "quote": "rather complicates matters. I shall want your help to-night.”",
+      "note": "wants Watson's help"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "II. The Red-Headed League",
+      "quote": "kindly put your army revolver in your pocket.",
+      "note": "asks Watson to bring his revolver"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "II. The Red-Headed League",
+      "quote": "me. What was this nocturnal expedition, and why should I go armed?",
+      "note": "Watson left in the dark"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "II. The Red-Headed League",
+      "quote": "Agra treasure, he has been more nearly correct than the official",
+      "note": "has outdone the official force"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "II. The Red-Headed League",
+      "quote": "Sherlock Holmes was not very communicative during the long drive and",
+      "note": "uncommunicative on the drive"
+    },
+    {
+      "habit": "music",
+      "story": "II. The Red-Headed League",
+      "quote": "lay back in the cab humming the tunes which he had heard in the",
+      "note": "hums the concert tunes"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "II. The Red-Headed League",
+      "quote": "an absolute imbecile in his profession. He has one positive virtue. He",
+      "note": "calls Jones an imbecile"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "II. The Red-Headed League",
+      "quote": "the floor and, with the lantern and a magnifying lens, began to examine",
+      "note": "on his knees with lens in the vault"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "II. The Red-Headed League",
+      "quote": "those. Then, when I flash a light upon them, close in swiftly. If they",
+      "note": "ambush in the bank vault"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "II. The Red-Headed League",
+      "quote": "fire, Watson, have no compunction about shooting them down.",
+      "note": "Watson armed in the ambush"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "II. The Red-Headed League",
+      "quote": "“Then we have stopped all the holes. And now we must be silent and",
+      "note": "all exits covered for the trap"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "II. The Red-Headed League",
+      "quote": "“You see, Watson,” he explained in the early hours of the morning as we",
+      "note": "explains over whisky and soda"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "II. The Red-Headed League",
+      "quote": "surprised you by beating upon the pavement with my stick. I was",
+      "note": "explains pavement-beating"
+    },
+    {
+      "habit": "reads_people",
+      "story": "III. A Case of Identity",
+      "quote": "“I have seen those symptoms before,” said Holmes, throwing his",
+      "note": "reads client's oscillation on pavement"
+    },
+    {
+      "habit": "reads_people",
+      "story": "III. A Case of Identity",
+      "quote": "an armchair, he looked her over in the minute and yet abstracted",
+      "note": "looks client over minutely"
+    },
+    {
+      "habit": "reads_people",
+      "story": "III. A Case of Identity",
+      "quote": "“Do you not find,” he said, “that with your short sight it is a little",
+      "note": "short sight and typewriting"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "III. A Case of Identity",
+      "quote": "husband you found so easy when the police and everyone had given him up",
+      "note": "found man police gave up for dead"
+    },
+    {
+      "habit": "fingertips_together",
+      "story": "III. A Case of Identity",
+      "quote": "Holmes, with his finger-tips together and his eyes to the ceiling.",
+      "note": "fingertips together, eyes to ceiling"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "III. A Case of Identity",
+      "quote": "“You will leave that question in my hands. I should like an accurate",
+      "note": "won't say what happened"
+    },
+    {
+      "habit": "fingertips_together",
+      "story": "III. A Case of Identity",
+      "quote": "Sherlock Holmes sat silent for a few minutes with his fingertips still",
+      "note": "sits silent with fingertips pressed"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "III. A Case of Identity",
+      "quote": "and oily clay pipe, which was to him as a counsellor, and, having lit",
+      "note": "clay pipe as counsellor"
+    },
+    {
+      "habit": "lounges_then_acts",
+      "story": "III. A Case of Identity",
+      "quote": "spinning up from him, and a look of infinite languor in his face.",
+      "note": "infinite languor while smoking"
+    },
+    {
+      "habit": "uses_records",
+      "story": "III. A Case of Identity",
+      "quote": "a trite one. You will find parallel cases, if you consult my index, in",
+      "note": "parallel cases in his index"
+    },
+    {
+      "habit": "reads_people",
+      "story": "III. A Case of Identity",
+      "quote": "realise the importance of sleeves, the suggestiveness of thumb-nails,",
+      "note": "sleeves, thumb-nails, boot-laces"
+    },
+    {
+      "habit": "reads_people",
+      "story": "III. A Case of Identity",
+      "quote": "boy, but concentrate yourself upon details. My first glance is always",
+      "note": "first glance at a woman's sleeve"
+    },
+    {
+      "habit": "reads_people",
+      "story": "III. A Case of Identity",
+      "quote": "wearing were not unlike each other, they were really odd ones; the one",
+      "note": "odd boots show hasty departure"
+    },
+    {
+      "habit": "reads_people",
+      "story": "III. A Case of Identity",
+      "quote": "and finger were stained with violet ink. She had written in a hurry and",
+      "note": "ink on glove shows note written"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "III. A Case of Identity",
+      "quote": "mind reading me the advertised description of Mr. Hosmer Angel?",
+      "note": "asks Watson to read the description"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "III. A Case of Identity",
+      "quote": "“No, that was not the point. However, I shall write two letters, which",
+      "note": "won't explain the signature point"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "III. A Case of Identity",
+      "quote": "I left him then, still puffing at his black clay pipe, with the",
+      "note": "left puffing his pipe"
+    },
+    {
+      "habit": "lounges_then_acts",
+      "story": "III. A Case of Identity",
+      "quote": "asleep, with his long, thin form curled up in the recesses of his",
+      "note": "half asleep in armchair"
+    },
+    {
+      "habit": "chemistry",
+      "story": "III. A Case of Identity",
+      "quote": "armchair. A formidable array of bottles and test-tubes, with the",
+      "note": "bottles and test-tubes"
+    },
+    {
+      "habit": "chemistry",
+      "story": "III. A Case of Identity",
+      "quote": "his day in the chemical work which was so dear to him.",
+      "note": "spent day in chemical work"
+    },
+    {
+      "habit": "chemistry",
+      "story": "III. A Case of Identity",
+      "quote": "“Yes. It was the bisulphate of baryta.”",
+      "note": "solved bisulphate of baryta"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "III. A Case of Identity",
+      "quote": "magnifying lens, that the fourteen other characteristics to which I",
+      "note": "typewriter defects under his lens"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "III. A Case of Identity",
+      "quote": "“Certainly,” said Holmes, stepping over and turning the key in the",
+      "note": "locks Windibank in"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "III. A Case of Identity",
+      "quote": "events, and you will contradict me if I go wrong.",
+      "note": "runs over the course of events"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "III. A Case of Identity",
+      "quote": "“The law cannot, as you say, touch you,” said Holmes, unlocking and",
+      "note": "lets Windibank go; law cannot touch him"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "III. A Case of Identity",
+      "quote": "“Well, of course it was obvious from the first that this Mr. Hosmer",
+      "note": "explains to Watson afterwards"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "III. A Case of Identity",
+      "quote": "“Having once spotted my man, it was easy to get corroboration. I knew",
+      "note": "explains verification"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "III. A Case of Identity",
+      "quote": "the peculiarities of the typewriter, and I wrote to the man himself at",
+      "note": "letter to get a typewritten reply"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "glad if you will come with me. Air and scenery perfect. Leave",
+      "note": "wires Watson to come"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "considerable difference to me, having someone with me on whom I can",
+      "note": "someone he can rely on"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "thoroughly rely. Local aid is always either worthless or else biassed.",
+      "note": "local aid worthless"
+    },
+    {
+      "habit": "uses_records",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "which Holmes had brought with him. Among these he rummaged and read,",
+      "note": "reads litter of papers on train"
+    },
+    {
+      "habit": "uses_records",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "looking through all the recent papers in order to master the",
+      "note": "masters particulars from papers"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "“Well, it is conjectured to be so. I shall take nothing for granted",
+      "note": "takes nothing for granted"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "which may have been by no means obvious to Mr. Lestrade. You know me",
+      "note": "will outdo Lestrade"
+    },
+    {
+      "habit": "reads_people",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "I very clearly perceive that in your bedroom the window is upon the",
+      "note": "deduces Watson's window side"
+    },
+    {
+      "habit": "reads_people",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "shave by the sunlight; but since your shaving is less and less complete",
+      "note": "from Watson's shaving"
+    },
+    {
+      "habit": "uses_records",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "He picked out from his bundle a copy of the local Herefordshire paper,",
+      "note": "uses local paper for evidence"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "not another word shall I say of this case until we are on the scene of",
+      "note": "silent until on scene"
+    },
+    {
+      "habit": "lounges_then_acts",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "sky. I have a caseful of cigarettes here which need smoking, and the",
+      "note": "prefers sofa and cigarettes for the evening"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "now let us talk about George Meredith, if you please, and we shall",
+      "note": "changes subject"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "“You are right,” said Holmes demurely; “you do find it very hard to",
+      "note": "mocks Lestrade"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "then had. Having measured these very carefully from seven or eight",
+      "note": "measures boots"
+    },
+    {
+      "habit": "lounges_then_acts",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "Sherlock Holmes was transformed when he was hot upon such a scent as",
+      "note": "transformed on the scent"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "trampled grass. He ran round, like a dog who is picking up a scent, and",
+      "note": "like a dog picking up a scent"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "three separate tracks of the same feet.” He drew out a lens and lay",
+      "note": "lies on waterproof with lens"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "seemed to me to be dust into an envelope and examining with his lens",
+      "note": "collects dust; lens on bark"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "“Is a tall man, left-handed, limps with the right leg, wears",
+      "note": "describes murderer from traces"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "“_Nous verrons_,” answered Holmes calmly. “You work your own method,",
+      "note": "works his own method apart from Lestrade"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "“The gentleman I describe.”",
+      "note": "won't name culprit to Lestrade"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "“Look here, Watson,” he said when the cloth was cleared “just sit down",
+      "note": "seeks Watson's advice"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "“Well, now, in considering this case there are two points about young",
+      "note": "explains the case to Watson"
+    },
+    {
+      "habit": "uses_records",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "“I wired to Bristol for it last night.” He put his hand over part of",
+      "note": "map of Victoria"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "gained the trifling details which I gave to that imbecile Lestrade, as",
+      "note": "calls Lestrade an imbecile"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "“You know my method. It is founded upon the observation of trifles.”",
+      "note": "observation of trifles"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "the ash of a cigar, which my special knowledge of tobacco ashes enables",
+      "note": "explains cigar ash"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "“I am no official agent. I understand that it was your daughter who",
+      "note": "no official agent"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "jot down the facts. You will sign it, and Watson here can witness it.",
+      "note": "Watson witnesses confession"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "IV. The Boscombe Valley Mystery",
+      "quote": "“In view of your health, nothing. You are yourself aware that you will",
+      "note": "lets Turner go"
+    },
+    {
+      "habit": "uses_records",
+      "story": "V. The Five Orange Pips",
+      "quote": "fireplace cross-indexing his records of crime, while I at the other was",
+      "note": "cross-indexing his records"
+    },
+    {
+      "habit": "reads_people",
+      "story": "V. The Five Orange Pips",
+      "quote": "“That clay and chalk mixture which I see upon your toe caps is quite",
+      "note": "client's origin from toe caps"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "V. The Five Orange Pips",
+      "quote": "Holmes shook his clenched hands in the air. “Incredible imbecility!” he",
+      "note": "scorns police"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "V. The Five Orange Pips",
+      "quote": "his pipe, and leaning back in his chair he watched the blue smoke-rings",
+      "note": "pipe after client leaves"
+    },
+    {
+      "habit": "fingertips_together",
+      "story": "V. The Five Orange Pips",
+      "quote": "his chair, with his finger-tips together. “The ideal reasoner,” he",
+      "note": "fingertips together"
+    },
+    {
+      "habit": "chemistry",
+      "story": "V. The Five Orange Pips",
+      "quote": "within fifty miles of town, chemistry eccentric, anatomy unsystematic,",
+      "note": "Watson's list: chemistry eccentric"
+    },
+    {
+      "habit": "music",
+      "story": "V. The Five Orange Pips",
+      "quote": "sensational literature and crime records unique, violin-player, boxer,",
+      "note": "Watson's list: violin-player"
+    },
+    {
+      "habit": "uses_records",
+      "story": "V. The Five Orange Pips",
+      "quote": "down the letter K of the _American Encyclopædia_ which stands upon the",
+      "note": "American Encyclopaedia"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "V. The Five Orange Pips",
+      "quote": "what may be deduced from it. In the first place, we may start with a",
+      "note": "reasons through the case to Watson"
+    },
+    {
+      "habit": "uses_records",
+      "story": "V. The Five Orange Pips",
+      "quote": "Holmes turned over the leaves of the book upon his knee. “Here it is,”",
+      "note": "reads KKK entry"
+    },
+    {
+      "habit": "music",
+      "story": "V. The Five Orange Pips",
+      "quote": "be done to-night, so hand me over my violin and let us try to forget",
+      "note": "violin to forget"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "V. The Five Orange Pips",
+      "quote": "“No; I shall be my own police. When I have spun the web they may take",
+      "note": "own police"
+    },
+    {
+      "habit": "ignores_food_sleep",
+      "story": "V. The Five Orange Pips",
+      "quote": "“Starving. It had escaped my memory. I have had nothing since",
+      "note": "nothing since breakfast"
+    },
+    {
+      "habit": "ignores_food_sleep",
+      "story": "V. The Five Orange Pips",
+      "quote": "“Not a bite. I had no time to think of it.”",
+      "note": "no time to eat"
+    },
+    {
+      "habit": "uses_records",
+      "story": "V. The Five Orange Pips",
+      "quote": "“I have spent the whole day,” said he, “over Lloyd’s registers and",
+      "note": "Lloyd's registers and old papers"
+    },
+    {
+      "habit": "uses_records",
+      "story": "V. The Five Orange Pips",
+      "quote": "“I searched the Dundee records, and when I found that the barque _Lone",
+      "note": "Dundee records"
+    },
+    {
+      "habit": "informants_and_agents",
+      "story": "V. The Five Orange Pips",
+      "quote": "this morning, homeward bound to Savannah. I wired to Gravesend and",
+      "note": "wires Gravesend"
+    },
+    {
+      "habit": "informants_and_agents",
+      "story": "V. The Five Orange Pips",
+      "quote": "night. I had it from the stevedore who has been loading their cargo. By",
+      "note": "information from stevedore"
+    },
+    {
+      "habit": "disguise",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "surprise, was none other than Sherlock Holmes. He made a slight motion",
+      "note": "disguised as old opium smoker"
+    },
+    {
+      "habit": "disguise",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "to the company once more, subsided into a doddering, loose-lipped",
+      "note": "resumes doddering senility"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "also to send a note by the cabman to your wife to say that you have",
+      "note": "draws Watson into the case"
+    },
+    {
+      "habit": "disguise",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "shuffled along with a bent back and an uncertain foot. Then, glancing",
+      "note": "keeps up disguise in street"
+    },
+    {
+      "habit": "disguise",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "have hoped to find a clue in the incoherent ramblings of these sots, as",
+      "note": "eavesdrops in disguise at opium den"
+    },
+    {
+      "habit": "informants_and_agents",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "put his two forefingers between his teeth and whistled shrilly—a signal",
+      "note": "whistles for his waiting driver"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "lanterns. “You’ll come with me, won’t you?”",
+      "note": "asks Watson along"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "“Oh, a trusty comrade is always of use; and a chronicler still more so.",
+      "note": "trusty comrade"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "“Of course you are. You’ll know all about it presently. Jump up here.",
+      "note": "you'll know presently"
+    },
+    {
+      "habit": "informants_and_agents",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "All right, John; we shall not need you. Here’s half a crown. Look out",
+      "note": "paid driver John"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "shrugged his shoulders, and lit up his pipe with the air of a man who",
+      "note": "lights pipe after silent thought"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "“You have a grand gift of silence, Watson,” said he. “It makes you",
+      "note": "values Watson as companion"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "Watson, and maybe you can see a spark where all is dark to me.",
+      "note": "states case to Watson"
+    },
+    {
+      "habit": "relies_on_watson",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "“This is my friend, Dr. Watson. He has been of most vital use to me in",
+      "note": "Watson of vital use"
+    },
+    {
+      "habit": "lounges_then_acts",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "Sherlock Holmes sprang out of his chair as if he had been galvanised.",
+      "note": "springs up galvanised"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "table he drew over the lamp and examined it intently. I had left my",
+      "note": "examines letter intently"
+    },
+    {
+      "habit": "explains_reasoning",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "“The name, you see, is in perfectly black ink, which has dried itself.",
+      "note": "explains ink deduction"
+    },
+    {
+      "habit": "examines_scene",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "with a dirty thumb. Ha! And the flap has been gummed, if I am not very",
+      "note": "deduces sender's dirty thumb, tobacco"
+    },
+    {
+      "habit": "ignores_food_sleep",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "had an unsolved problem upon his mind, would go for days, and even for",
+      "note": "goes days without rest"
+    },
+    {
+      "habit": "ignores_food_sleep",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "to me that he was now preparing for an all-night sitting. He took off",
+      "note": "all-night sitting"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "ounce of shag tobacco and a box of matches laid out in front of him. In",
+      "note": "ounce of shag on pillows"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "room was full of a dense tobacco haze, but nothing remained of the heap",
+      "note": "tobacco haze by morning"
+    },
+    {
+      "habit": "lounges_then_acts",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "sombre thinker of the previous night.",
+      "note": "different man after night's thought"
+    },
+    {
+      "habit": "withholds_conclusions",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "“I want to test a little theory of mine,” said he, pulling on his",
+      "note": "theory unspoken"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "“He certainly needs a wash,” remarked Holmes. “I had an idea that he",
+      "note": "brings sponge to unmask Boone"
+    },
+    {
+      "habit": "sets_trap_or_ruse",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "stooped to the water-jug, moistened his sponge, and then rubbed it",
+      "note": "washes the face to reveal St. Clair"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "“If you leave it to a court of law to clear the matter up,” said he,",
+      "note": "helps keep case out of court"
+    },
+    {
+      "habit": "works_apart_from_police",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "the matter up. I wish I knew how you reach your results.",
+      "note": "police baffled by his results"
+    },
+    {
+      "habit": "smokes_while_thinking",
+      "story": "VI. The Man with the Twisted Lip",
+      "quote": "“I reached this one,” said my friend, “by sitting upon five pillows and",
+      "note": "five pillows and shag"
+    }
+  ],
+  "new_keys": {
+    "fingertips_together": "Holmes presses his fingertips together (often eyes closed or to the ceiling) while listening or reasoning"
+  }
+}

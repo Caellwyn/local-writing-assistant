@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import os
 import re
+import sys
 from functools import lru_cache
 from typing import Callable
 
@@ -12,49 +14,57 @@ import ollama
 # hf.co/<user>/<repo>[:<quantization>], e.g. hf.co/bartowski/Llama-3.2-3B-Instruct-GGUF:Q4_K_M
 _HF_REF = re.compile(r"^hf\.co/[A-Za-z0-9][\w.-]{0,95}/[A-Za-z0-9][\w.-]{0,95}(:[\w.-]{1,64})?$")
 
-# fit_gb = rough total memory at an 8K context (weights + KV cache + buffers).
-# llama3.1:8b was measured on an RTX 4070 Laptop (5.8 GB); the rest are
-# estimates from model size and architecture. hardware.fit_check() reports
-# the real number once a model is loaded.
+# kv_elems = values the model keeps in its context (KV) cache per token:
+#   (layers with a full KV cache) x (KV heads) x (key dim + value dim)
+# from each model's architecture. Memory is estimated by estimate_fit_gb();
+# hardware.fit_check() reports the real split once a model is loaded.
+# fit_gb is only a fallback for models whose architecture isn't known.
 CATALOG: list[dict] = [
     {
-        "tag": "llama3.2:3b", "label": "Llama 3.2 3B", "size_gb": 2.0, "fit_gb": 3.2,
-        "thinking": False, "license": "Llama 3.2 Community License",
+        "tag": "llama3.2:3b", "label": "Llama 3.2 3B", "size_gb": 2.0, "kv_elems": 28 * 8 * 256,
+        "fit_gb": 3.2, "thinking": False, "license": "Llama 3.2 Community License",
         "blurb": "Small and quick. Good for older or smaller GPUs.",
     },
     {
         # The plain qwen3:4b tag is the thinking-only 2507 build (slow for agent
         # work); the instruct build answers directly and handles tools well.
-        "tag": "qwen3:4b-instruct", "label": "Qwen3 4B", "size_gb": 2.5, "fit_gb": 4.0,
-        "thinking": False, "license": "Apache 2.0",
+        "tag": "qwen3:4b-instruct", "label": "Qwen3 4B", "size_gb": 2.5, "kv_elems": 36 * 8 * 256,
+        "fit_gb": 4.0, "thinking": False, "license": "Apache 2.0",
         "blurb": "Strong for its size; the most reliable tool use in the lineup.",
     },
     {
-        "tag": "llama3.1:8b", "label": "Llama 3.1 8B", "size_gb": 4.9, "fit_gb": 5.8,
-        "thinking": False, "license": "Llama 3.1 Community License",
+        "tag": "llama3.1:8b", "label": "Llama 3.1 8B", "size_gb": 4.9, "kv_elems": 32 * 8 * 256,
+        "fit_gb": 5.8, "thinking": False, "license": "Llama 3.1 Community License",
         "blurb": "Good prose for plain chat; less reliable with library tools.",
     },
     {
-        "tag": "qwen3:8b", "label": "Qwen3 8B", "size_gb": 5.2, "fit_gb": 6.6,
-        "thinking": True, "license": "Apache 2.0",
-        "blurb": "Sharper reasoning; slightly too big for 8 GB at 8K context.",
+        "tag": "qwen3:8b", "label": "Qwen3 8B", "size_gb": 5.2, "kv_elems": 36 * 8 * 256,
+        "fit_gb": 6.6, "thinking": True, "license": "Apache 2.0",
+        "blurb": "Sharper reasoning; needs more than 8 GB at 8K context.",
     },
     {
-        "tag": "gemma4:12b-it-qat", "label": "Gemma 4 12B", "size_gb": 7.2, "fit_gb": 8.8,
-        "thinking": False, "license": "Gemma terms (see model page)",
+        # Gemma uses sliding-window attention on most layers; its exact cache
+        # size isn't modelled here, so the fallback fit_gb is used.
+        "tag": "gemma4:12b-it-qat", "label": "Gemma 4 12B", "size_gb": 7.2, "kv_elems": None,
+        "fit_gb": 8.8, "thinking": False, "license": "Gemma terms (see model page)",
         "blurb": "Polished prose. Needs a 12 GB GPU.",
     },
     {
-        "tag": "qwen3:14b", "label": "Qwen3 14B", "size_gb": 9.3, "fit_gb": 10.9,
-        "thinking": True, "license": "Apache 2.0",
-        "blurb": "Best of the lineup. Needs a 12–16 GB GPU.",
+        "tag": "qwen3:14b", "label": "Qwen3 14B", "size_gb": 9.3, "kv_elems": 40 * 8 * 256,
+        "fit_gb": 10.9, "thinking": True, "license": "Apache 2.0",
+        "blurb": "Best of the lineup. Needs a 16 GB GPU.",
     },
 ]
 
-# GPU memory the driver/desktop keep for themselves (Ollama reported 6.5 GiB
-# available of 8 GiB on the dev machine).
-RESERVED_GB = 1.5
+# GPU memory not available for model data: driver/desktop use plus Ollama's own
+# working buffers. On the dev machine (8 GiB) Ollama reported 6.5 GiB available
+# but placed at most ~5.9 GiB of a model on the GPU, hence 2.0.
+RESERVED_GB = 2.0
 FALLBACK = "llama3.2:3b"
+DEFAULT_CTX = 8192
+OVERHEAD_GB = 0.3  # compute buffers etc.; calibrated against `ollama ps` on the dev machine
+# bytes per cached value for each OLLAMA_KV_CACHE_TYPE (q8_0/q4_0 store a scale per 32 values)
+KV_BYTES = {"f16": 2.0, "q8_0": 34 / 32, "q4_0": 18 / 32}
 
 
 def by_tag(tag: str) -> dict | None:
@@ -65,8 +75,94 @@ def budget_gb(vram_gb: float) -> float:
     return max(vram_gb - RESERVED_GB, 0.0)
 
 
+# -- What the Ollama server is configured with --------------------------------
+
+def _ollama_setting(name: str) -> str:
+    """An Ollama server setting: this process's environment, else the user's saved one."""
+    if os.environ.get(name):
+        return os.environ[name]
+    if sys.platform == "win32":
+        import winreg
+        try:
+            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment") as k:
+                return str(winreg.QueryValueEx(k, name)[0])
+        except OSError:
+            pass
+    return ""
+
+
+def server_parallel() -> int:
+    try:
+        return max(int(_ollama_setting("OLLAMA_NUM_PARALLEL") or 1), 1)
+    except ValueError:
+        return 1
+
+
+def kv_cache_type() -> str:
+    t = _ollama_setting("OLLAMA_KV_CACHE_TYPE").lower() or "f16"
+    return t if t in KV_BYTES else "f16"
+
+
+# -- Memory estimate ----------------------------------------------------------
+
+def kv_elems_from_info(info: dict) -> int | None:
+    """Cached values per token, from GGUF model info (handles hybrid models)."""
+    arch = info.get("general.architecture")
+    if not arch:
+        return None
+    get = lambda key: info.get(f"{arch}.{key}")
+    layers, kv_heads = get("block_count"), get("attention.head_count_kv")
+    if isinstance(kv_heads, list):  # some models list KV heads per layer
+        kv_heads = max(kv_heads) if kv_heads else None
+    if not layers or not kv_heads:
+        return None
+    head_dim = None
+    if get("embedding_length") and get("attention.head_count"):
+        head_dim = get("embedding_length") // get("attention.head_count")
+    k_dim, v_dim = get("attention.key_length") or head_dim, get("attention.value_length") or head_dim
+    if not k_dim or not v_dim:
+        return None
+    interval = get("full_attention_interval")  # hybrid models: only every Nth layer has a KV cache
+    kv_layers = layers // interval if interval else layers
+    return int(kv_layers * kv_heads * (k_dim + v_dim))
+
+
+@lru_cache(maxsize=64)
+def _installed_kv_elems(tag: str) -> int | None:
+    try:
+        return kv_elems_from_info(dict(ollama.show(tag).modelinfo or {}))
+    except Exception:
+        return None
+
+
+def estimate_fit_gb(
+    weights_gb: float, kv_elems: int | None, num_ctx: int = DEFAULT_CTX,
+    parallel: int | None = None, kv_type: str | None = None, fallback_gb: float | None = None,
+) -> float:
+    """Weights + context cache (x parallel slots) + overhead, in GiB."""
+    if not kv_elems:
+        return fallback_gb if fallback_gb is not None else weights_gb + 1.2
+    parallel = parallel or server_parallel()
+    kv_gb = kv_elems * KV_BYTES[kv_type or kv_cache_type()] * num_ctx * parallel / 1024**3
+    return round(weights_gb + kv_gb + OVERHEAD_GB, 2)
+
+
+def model_fit_gb(model: dict, num_ctx: int = DEFAULT_CTX) -> float:
+    """Estimated memory for a catalog entry (or a downloaded model's entry)."""
+    weights = model["size_gb"] * 1e9 / 1024**3  # download sizes are decimal GB
+    kv = model.get("kv_elems")
+    if kv is None and model.get("installed"):
+        kv = _installed_kv_elems(model["tag"])
+    return estimate_fit_gb(weights, kv, num_ctx, fallback_gb=model.get("fit_gb"))
+
+
+def installed_fit_gb(tag: str, size_gib: float, num_ctx: int = DEFAULT_CTX) -> float:
+    """Estimated memory for a downloaded model, from its real architecture."""
+    return estimate_fit_gb(size_gib, _installed_kv_elems(tag), num_ctx)
+
+
 def fits(model: dict, vram_gb: float) -> bool:
-    return model["fit_gb"] <= budget_gb(vram_gb)
+    return model_fit_gb(model) <= budget_gb(vram_gb)
 
 
 # Preference order for the library agent, best first. Based on testing the
@@ -161,8 +257,11 @@ def template_info(tag: str) -> dict:
         info = ollama.show(tag)
     except Exception:
         return {"system": True, "tools": False}
+    # Models with a built-in renderer (Ollama's own qwen3.5 builds) show a placeholder template,
+    # {{ .Prompt }}; the renderer formats every role itself, system messages included.
+    renderer = any(line.startswith("RENDERER ") for line in (info.modelfile or "").splitlines())
     return {
-        "system": template_supports_system(info.template or ""),
+        "system": renderer or template_supports_system(info.template or ""),
         "tools": "tools" in (info.capabilities or []),
     }
 
@@ -218,6 +317,7 @@ def delete(tag: str) -> None:
     ollama.delete(tag)
     capabilities.cache_clear()
     template_info.cache_clear()
+    _installed_kv_elems.cache_clear()
 
 
 def pull(tag: str, on_progress: Callable[[str, int, int], None]) -> None:

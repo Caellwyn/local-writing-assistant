@@ -10,3 +10,8 @@ settings.json
 settings.json.bak
 app.log
 *.tmp
+
+# Evaluation corpus (downloaded)
+evals/.corpus/
+evals/.corpus-full/
+evals/runs/

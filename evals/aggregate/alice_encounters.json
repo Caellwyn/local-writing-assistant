@@ -1,0 +1,634 @@
+{
+  "source": "evals/.corpus/raw/pg11.txt — Project Gutenberg eBook #11, \"Alice's Adventures in Wonderland\" by Lewis Carroll (Millennium Fulcrum Edition 3.0); text between the *** START OF / *** END OF markers only.",
+  "question": "Is Alice more likely to befriend, or be at odds with, the people and creatures she meets in Wonderland?",
+  "encounters": [
+    {
+      "character": "the White Rabbit",
+      "chapter": 2,
+      "chapter_title": "The Pool of Tears",
+      "stance": "neutral",
+      "why": "Alice timidly asks the Rabbit for help, but it simply takes fright and runs off, so there is no real exchange either way.",
+      "quotes": [
+        "she began, in a low, timid voice, “If you please,",
+        "The Rabbit started violently, dropped the white kid gloves and",
+        "skurried away into the darkness as hard as he could go."
+      ]
+    },
+    {
+      "character": "the Mouse",
+      "chapter": 2,
+      "chapter_title": "The Pool of Tears",
+      "stance": "mixed",
+      "why": "Alice keeps offending the Mouse by talking about Dinah and dogs, and it bristles angrily; she apologises and coaxes it back, and it agrees to tell her its history.",
+      "quotes": [
+        "“Oh, I beg your pardon!” cried Alice hastily",
+        "_hated_ cats: nasty, low, vulgar things! Don’t let me hear the name",
+        "“Let us get to the shore, and then I’ll tell you my"
+      ]
+    },
+    {
+      "character": "the Lory",
+      "chapter": 3,
+      "chapter_title": "A Caucus-Race and a Long Tale",
+      "stance": "hostile",
+      "why": "Alice has a long argument with the Lory, which turns sulky and won't tell her its age.",
+      "quotes": [
+        "Indeed, she had quite a long argument",
+        "with the Lory, who at last turned sulky",
+        "older than you, and must know better;"
+      ]
+    },
+    {
+      "character": "the Mouse",
+      "chapter": 3,
+      "chapter_title": "A Caucus-Race and a Long Tale",
+      "stance": "mixed",
+      "why": "The Mouse kindly asks how Alice is getting on and says she should get a prize too, but when her puns make it think she isn't listening it accuses her of insulting it and walks off.",
+      "quotes": [
+        "How are you getting on now, my dear?",
+        "“You are not attending!” said the Mouse to Alice severely.",
+        "“You insult me by talking such nonsense!”"
+      ]
+    },
+    {
+      "character": "the Dodo",
+      "chapter": 3,
+      "chapter_title": "A Caucus-Race and a Long Tale",
+      "stance": "friendly",
+      "why": "The Dodo includes Alice in the Caucus-race and solemnly presents her own thimble back to her as a prize; Alice goes along with it politely.",
+      "quotes": [
+        "“Why, _she_, of course,” said the Dodo, pointing to Alice with one",
+        "“We beg your acceptance of this elegant",
+        "she simply bowed, and took the thimble"
+      ]
+    },
+    {
+      "character": "the other creatures of the Caucus-race party (the Duck, the Eaglet, the Magpie, the Canary and others)",
+      "chapter": 3,
+      "chapter_title": "A Caucus-Race and a Long Tale",
+      "stance": "mixed",
+      "why": "The party crowds round Alice for prizes and cheers her, but when she praises Dinah's appetite for birds they all make excuses and leave her alone.",
+      "quotes": [
+        "“Prizes! Prizes!”",
+        "This speech caused a remarkable sensation among the party.",
+        "On various pretexts they all moved off, and Alice was soon left"
+      ]
+    },
+    {
+      "character": "the White Rabbit",
+      "chapter": 4,
+      "chapter_title": "The Rabbit Sends in a Little Bill",
+      "stance": "hostile",
+      "why": "The Rabbit angrily orders Alice about as his housemaid, then tries to force his way in and plans to burn the house down; Alice snatches at him and threatens to set Dinah on them.",
+      "quotes": [
+        "called out to her in an angry tone, “Why, Mary Ann, what _are_ you",
+        "“We must burn the house down!” said the Rabbit’s voice;",
+        "“If you do, I’ll set Dinah at you!”"
+      ]
+    },
+    {
+      "character": "Pat",
+      "chapter": 4,
+      "chapter_title": "The Rabbit Sends in a Little Bill",
+      "stance": "hostile",
+      "why": "Pat is sent to take away Alice's giant arm, and she snatches at him and sends him and the Rabbit into the cucumber-frames.",
+      "quotes": [
+        "“Well, it’s got no business there, at any rate: go and take it away!”",
+        "“Sure, I don’t like it, yer honour, at all, at",
+        "_two_ little shrieks, and more sounds of broken glass."
+      ]
+    },
+    {
+      "character": "Bill the Lizard",
+      "chapter": 4,
+      "chapter_title": "The Rabbit Sends in a Little Bill",
+      "stance": "hostile",
+      "why": "Bill is sent down the chimney after Alice, and she kicks him out of it like a sky-rocket.",
+      "quotes": [
+        "I _think_ I can kick a little!”",
+        "saying to herself “This is Bill,” she gave one sharp kick, and waited",
+        "like a Jack-in-the-box, and up I goes like a sky-rocket!”"
+      ]
+    },
+    {
+      "character": "the crowd of little animals and birds at the Rabbit's house (including two guinea-pigs)",
+      "chapter": 4,
+      "chapter_title": "The Rabbit Sends in a Little Bill",
+      "stance": "hostile",
+      "why": "The besiegers pelt Alice with pebbles and rush at her when she comes out, and she runs away from them.",
+      "quotes": [
+        "for the next moment a shower of little pebbles came rattling in at the",
+        "They all made a rush at Alice the moment she",
+        "but she ran off as hard as she could"
+      ]
+    },
+    {
+      "character": "the puppy",
+      "chapter": 4,
+      "chapter_title": "The Rabbit Sends in a Little Bill",
+      "stance": "friendly",
+      "why": "Alice coaxes the enormous puppy and plays fetch with it, frightened but fond of it ('a dear little puppy').",
+      "quotes": [
+        "said Alice, in a coaxing tone",
+        "with a yelp of delight",
+        "“And yet what a dear little puppy it was!”"
+      ]
+    },
+    {
+      "character": "the Caterpillar",
+      "chapter": 5,
+      "chapter_title": "Advice from a Caterpillar",
+      "stance": "mixed",
+      "why": "The Caterpillar is curt, contradicts her and gets angry, so Alice nearly loses her temper, but it also gives her the useful advice about the two sides of the mushroom.",
+      "quotes": [
+        "“You!” said the Caterpillar contemptuously.",
+        "“It is a very good height indeed!” said the Caterpillar angrily,",
+        "“One side will make you grow taller, and the other side will make you"
+      ]
+    },
+    {
+      "character": "the Pigeon",
+      "chapter": 5,
+      "chapter_title": "Advice from a Caterpillar",
+      "stance": "hostile",
+      "why": "The Pigeon beats Alice with its wings, calls her a serpent, won't believe her, and sends her off.",
+      "quotes": [
+        "face, and was beating her violently with its wings.",
+        "“A likely story indeed!” said the Pigeon in a tone of the deepest",
+        "“Well, be off, then!” said the Pigeon in a sulky tone"
+      ]
+    },
+    {
+      "character": "the Frog-Footman",
+      "chapter": 6,
+      "chapter_title": "Pig and Pepper",
+      "stance": "hostile",
+      "why": "The Footman ignores Alice's questions and answers in nonsense; she finds him uncivil and calls him idiotic.",
+      "quotes": [
+        "this Alice thought decidedly uncivil.",
+        "“Anything you like,” said the Footman, and began whistling.",
+        "“Oh, there’s no use in talking to him,” said Alice desperately"
+      ]
+    },
+    {
+      "character": "the Duchess",
+      "chapter": 6,
+      "chapter_title": "Pig and Pepper",
+      "stance": "hostile",
+      "why": "The Duchess snubs Alice, calls for her head to be chopped off, and flings the baby at her.",
+      "quotes": [
+        "“You don’t know much,” said the Duchess; “and that’s a fact.”",
+        "“Talking of axes,” said the Duchess, “chop off her head!”",
+        "flinging the baby at her as she spoke."
+      ]
+    },
+    {
+      "character": "the cook",
+      "chapter": 6,
+      "chapter_title": "Pig and Pepper",
+      "stance": "neutral",
+      "why": "Alice cries out to the cook to stop throwing things, but the cook ignores her completely.",
+      "quotes": [
+        "“Oh, _please_ mind what you’re doing!” cried Alice, jumping up and down",
+        "but the cook was busily stirring the soup, and seemed not to"
+      ]
+    },
+    {
+      "character": "the baby",
+      "chapter": 6,
+      "chapter_title": "Pig and Pepper",
+      "stance": "friendly",
+      "why": "Alice rescues the baby from the kitchen so it won't be killed, and when it turns into a pig she lets it go, relieved, though she warns she'll have nothing more to do with it if it does.",
+      "quotes": [
+        "thought Alice, “they’re sure to kill it in a day or two: wouldn’t it be",
+        "said Alice, seriously, “I’ll have nothing more to do with you.",
+        "So she set the little creature down, and felt quite relieved to see it"
+      ]
+    },
+    {
+      "character": "the Cheshire Cat",
+      "chapter": 6,
+      "chapter_title": "Pig and Pepper",
+      "stance": "friendly",
+      "why": "The good-natured Cat answers her questions, tells her the way to the Hatter and March Hare, and agrees to vanish slowly when she asks.",
+      "quotes": [
+        "The Cat only grinned when it saw Alice. It looked good-natured, she",
+        "“Come, it’s pleased so far,” thought Alice",
+        "“That depends a good deal on where you want to get to,” said the Cat."
+      ]
+    },
+    {
+      "character": "the March Hare",
+      "chapter": 7,
+      "chapter_title": "A Mad Tea-Party",
+      "stance": "hostile",
+      "why": "The March Hare tells her there's no room, offers wine that doesn't exist, and scolds her for sitting down; she answers angrily.",
+      "quotes": [
+        "“No room! No room!” they cried out",
+        "“Then it wasn’t very civil of you to offer it,” said Alice angrily.",
+        "“It wasn’t very civil of you to sit down without being invited,” said"
+      ]
+    },
+    {
+      "character": "the Hatter",
+      "chapter": 7,
+      "chapter_title": "A Mad Tea-Party",
+      "stance": "hostile",
+      "why": "The Hatter makes personal remarks and calls her stupid, and finally he is so rude that Alice walks out in disgust.",
+      "quotes": [
+        "“Your hair wants cutting,” said the Hatter.",
+        "think you could draw treacle out of a treacle-well—eh, stupid?”",
+        "This piece of rudeness was more than Alice could bear: she got up in"
+      ]
+    },
+    {
+      "character": "the Dormouse",
+      "chapter": 7,
+      "chapter_title": "A Mad Tea-Party",
+      "stance": "mixed",
+      "why": "The Dormouse tells Alice a story because she asks, but sulks and takes offence when she interrupts; she apologises humbly.",
+      "quotes": [
+        "“If you can’t be civil, you’d better finish the story for",
+        "“No, please go on!” Alice said very humbly;",
+        "“One, indeed!” said the Dormouse indignantly. However, he consented to"
+      ]
+    },
+    {
+      "character": "the three gardeners (Two, Five and Seven)",
+      "chapter": 8,
+      "chapter_title": "The Queen’s Croquet-Ground",
+      "stance": "friendly",
+      "why": "The gardeners bow to Alice and politely explain what they are doing, and when the Queen orders their heads off, Alice hides them in a flower-pot to save them.",
+      "quotes": [
+        "and all of them bowed low.",
+        "“Why the fact is, you see, Miss,",
+        "“You shan’t be beheaded!” said Alice, and she put them into a large"
+      ]
+    },
+    {
+      "character": "the Queen of Hearts",
+      "chapter": 8,
+      "chapter_title": "The Queen’s Croquet-Ground",
+      "stance": "hostile",
+      "why": "The Queen glares at Alice and screams for her head; Alice answers 'Nonsense!' and privately says she doesn't like her at all.",
+      "quotes": [
+        "moment like a wild beast, screamed “Off with her head! Off—”",
+        "“Nonsense!” said Alice, very loudly and decidedly, and the Queen was",
+        "“Not at all,” said Alice: “she’s so extremely—”"
+      ]
+    },
+    {
+      "character": "the King of Hearts",
+      "chapter": 8,
+      "chapter_title": "The Queen’s Croquet-Ground",
+      "stance": "mixed",
+      "why": "The King speaks up for Alice to the Queen, but he then wants her friend the Cheshire Cat removed, and she contradicts him.",
+      "quotes": [
+        "dear: she is only a child!”",
+        "“A cat may look at a king,” said Alice.",
+        "“Well, it must be removed,” said the King very decidedly"
+      ]
+    },
+    {
+      "character": "the White Rabbit",
+      "chapter": 8,
+      "chapter_title": "The Queen’s Croquet-Ground",
+      "stance": "friendly",
+      "why": "Walking next to her, the Rabbit makes timid small talk and whispers the Duchess's news to her.",
+      "quotes": [
+        "“It’s—it’s a very fine day!” said a timid voice at her side.",
+        "walking by the White Rabbit, who was peeping anxiously into her face.",
+        "put his mouth close to her ear, and whispered"
+      ]
+    },
+    {
+      "character": "the Cheshire Cat",
+      "chapter": 8,
+      "chapter_title": "The Queen’s Croquet-Ground",
+      "stance": "friendly",
+      "why": "Alice is glad to have the Cat to talk to, pours out her complaints to it, and introduces it as 'a friend of mine'.",
+      "quotes": [
+        "to herself “It’s the Cheshire Cat: now I shall have somebody to talk",
+        "“It’s a friend of mine—a Cheshire Cat,” said Alice:",
+        "went back for a little more conversation with her"
+      ]
+    },
+    {
+      "character": "the executioner",
+      "chapter": 8,
+      "chapter_title": "The Queen’s Croquet-Ground",
+      "stance": "neutral",
+      "why": "Along with the King and Queen, the executioner asks Alice to settle their argument about beheading the Cat; there is no feeling either way.",
+      "quotes": [
+        "The moment Alice appeared, she was appealed to by all three to settle",
+        "The executioner’s argument was, that you couldn’t cut off a head unless"
+      ]
+    },
+    {
+      "character": "the flamingo",
+      "chapter": 8,
+      "chapter_title": "The Queen’s Croquet-Ground",
+      "stance": "neutral",
+      "why": "Her flamingo mallet keeps twisting round to look at her and wandering off; this is awkward and funny rather than friendly or hostile.",
+      "quotes": [
+        "The chief difficulty Alice found at first was in managing her flamingo:",
+        "up in her face, with such a puzzled expression that she could not help",
+        "bursting out laughing"
+      ]
+    },
+    {
+      "character": "the Duchess",
+      "chapter": 9,
+      "chapter_title": "The Mock Turtle’s Story",
+      "stance": "mixed",
+      "why": "This time the Duchess is affectionate and agrees with everything Alice says, but Alice is uncomfortable with her sharp chin and finally answers her sharply.",
+      "quotes": [
+        "“You can’t think how glad I am to see you again, you dear old thing!”",
+        "uncomfortably sharp chin. However, she did not like to be rude, so she",
+        "“I’ve a right to think,” said Alice sharply, for she was beginning to"
+      ]
+    },
+    {
+      "character": "the Queen of Hearts",
+      "chapter": 9,
+      "chapter_title": "The Mock Turtle’s Story",
+      "stance": "neutral",
+      "why": "The Queen is civil to Alice here and even arranges for her to meet the Mock Turtle, but Alice is too frightened to speak and is glad to get away from 'that savage Queen'.",
+      "quotes": [
+        "“Let’s go on with the game,” the Queen said to Alice; and Alice was too",
+        "much frightened to say a word, but slowly followed her back to the",
+        "as to go after that savage Queen"
+      ]
+    },
+    {
+      "character": "the Gryphon",
+      "chapter": 9,
+      "chapter_title": "The Mock Turtle’s Story",
+      "stance": "mixed",
+      "why": "The Gryphon takes Alice to the Mock Turtle and chats with her, but snaps at her and calls her a simpleton.",
+      "quotes": [
+        "but on the whole she thought it would be quite as safe to stay with it",
+        "“Hold your tongue!” added the Gryphon, before Alice could speak again.",
+        "is, you _are_ a simpleton.”"
+      ]
+    },
+    {
+      "character": "the Mock Turtle",
+      "chapter": 9,
+      "chapter_title": "The Mock Turtle’s Story",
+      "stance": "mixed",
+      "why": "Alice feels sorry for the Mock Turtle and listens patiently to his history, but he calls her dull and they bicker over his school.",
+      "quotes": [
+        "pitied him deeply.",
+        "“I’ll tell it her,” said the Mock Turtle in a deep, hollow tone: “sit",
+        "angrily: “really you are very dull!”"
+      ]
+    },
+    {
+      "character": "the Mock Turtle",
+      "chapter": 10,
+      "chapter_title": "The Lobster Quadrille",
+      "stance": "friendly",
+      "why": "The Mock Turtle dances the Lobster Quadrille for Alice and sings her a song when she asks; she thanks him warmly.",
+      "quotes": [
+        "“Would you like to see a little of it?” said the Mock Turtle.",
+        "“Thank you, it’s a very interesting dance to watch,” said Alice,",
+        "“Oh, a song, please, if the Mock Turtle would be so kind,” Alice"
+      ]
+    },
+    {
+      "character": "the Gryphon",
+      "chapter": 10,
+      "chapter_title": "The Lobster Quadrille",
+      "stance": "friendly",
+      "why": "The Gryphon dances for Alice, asks to hear her adventures, sticks up for her ('She can't explain it'), and takes her by the hand to the trial; it is only sometimes impatient.",
+      "quotes": [
+        "“Come, let’s hear some of _your_ adventures.”",
+        "“She can’t explain it,” said the Gryphon hastily.",
+        "“Come on!” cried the Gryphon, and, taking Alice by the hand, it hurried"
+      ]
+    },
+    {
+      "character": "the Gryphon",
+      "chapter": 11,
+      "chapter_title": "Who Stole the Tarts?",
+      "stance": "neutral",
+      "why": "Alice whispers a question to the Gryphon about the jurors and it whispers back the answer; nothing more passes between them.",
+      "quotes": [
+        "they doing?” Alice whispered to the Gryphon.",
+        "“They’re putting down their names,” the Gryphon whispered in reply,"
+      ]
+    },
+    {
+      "character": "Bill the Lizard",
+      "chapter": 11,
+      "chapter_title": "Who Stole the Tarts?",
+      "stance": "hostile",
+      "why": "Alice can't stand Bill's squeaky pencil, so she sneaks up and takes it, and he is left writing with his finger.",
+      "quotes": [
+        "One of the jurors had a pencil that squeaked. This of course, Alice",
+        "very soon found an opportunity of taking it away.",
+        "that the poor little juror (it was Bill, the Lizard) could not make out"
+      ]
+    },
+    {
+      "character": "the Dormouse",
+      "chapter": 11,
+      "chapter_title": "Who Stole the Tarts?",
+      "stance": "hostile",
+      "why": "The Dormouse complains that Alice is squeezing him and says she has no right to grow; she tells him not to talk nonsense and he moves away sulkily.",
+      "quotes": [
+        "“I wish you wouldn’t squeeze so,” said the Dormouse, who was sitting",
+        "“You’ve no right to grow _here_,” said the Dormouse.",
+        "“Don’t talk nonsense,” said Alice more boldly:"
+      ]
+    },
+    {
+      "character": "the White Rabbit",
+      "chapter": 11,
+      "chapter_title": "Who Stole the Tarts?",
+      "stance": "neutral",
+      "why": "As herald, the Rabbit cuts Alice off with 'Silence in the court!' and later calls her as a witness; this is official business, not personal.",
+      "quotes": [
+        "stopped hastily, for the White Rabbit cried out, “Silence in the",
+        "surprise, when the White Rabbit read out, at the top of his shrill",
+        "little voice, the name “Alice!”"
+      ]
+    },
+    {
+      "character": "the King of Hearts",
+      "chapter": 12,
+      "chapter_title": "Alice’s Evidence",
+      "stance": "hostile",
+      "why": "The King makes up a 'Rule Forty-two' to throw Alice out of court; she refuses to go and catches him out.",
+      "quotes": [
+        "“You are,” said the King.",
+        "regular rule: you invented it just now.”",
+        "“Then it ought to be Number One,” said Alice."
+      ]
+    },
+    {
+      "character": "the Queen of Hearts",
+      "chapter": 12,
+      "chapter_title": "Alice’s Evidence",
+      "stance": "hostile",
+      "why": "Alice and the Queen have an open row: the Queen orders her silenced and beheaded, and Alice defies her.",
+      "quotes": [
+        "“Hold your tongue!” said the Queen, turning purple.",
+        "“Off with her head!” the Queen shouted at the top of her voice.",
+        "“Who cares for you?” said Alice,"
+      ]
+    },
+    {
+      "character": "Bill the Lizard",
+      "chapter": 12,
+      "chapter_title": "Alice’s Evidence",
+      "stance": "mixed",
+      "why": "Alice accidentally puts Bill back in the jury-box head downwards; she does set him right, but remarks that he's as useful either way up.",
+      "quotes": [
+        "the Lizard in head downwards, and the poor little thing was waving its",
+        "got it out again, and put it right;",
+        "trial one way up as the other.”"
+      ]
+    },
+    {
+      "character": "the jurymen",
+      "chapter": 12,
+      "chapter_title": "Alice’s Evidence",
+      "stance": "mixed",
+      "why": "Alice knocks over the jury-box, apologises and puts the jurymen back, but later dares them to find any meaning in the verses.",
+      "quotes": [
+        "a hurry that she tipped over the jury-box with the edge of her skirt,",
+        "“Oh, I _beg_ your pardon!” she exclaimed in a tone of great dismay, and",
+        "“If any one of them can explain it,” said Alice,"
+      ]
+    },
+    {
+      "character": "the pack of cards",
+      "chapter": 12,
+      "chapter_title": "Alice’s Evidence",
+      "stance": "hostile",
+      "why": "When Alice dismisses them as nothing but cards, the whole pack flies at her and she fights them off.",
+      "quotes": [
+        "“You’re nothing but a pack of cards!”",
+        "At this the whole pack rose up into the air, and came flying down upon",
+        "tried to beat them off"
+      ]
+    }
+  ],
+  "mentioned_only": [
+    {
+      "character": "Dinah",
+      "kind": "mentioned",
+      "note": "Alice's cat; Alice talks about her often (Ch I–IV) and it upsets the Mouse and the birds, but Dinah never appears."
+    },
+    {
+      "character": "Alice's sister",
+      "kind": "outside_wonderland",
+      "note": "Alice is sitting with her at the start (Ch I) and she wakes Alice at the end (Ch XII); this is the real world, so she is not counted as a Wonderland encounter."
+    },
+    {
+      "character": "Ada and Mabel",
+      "kind": "mentioned",
+      "note": "Children Alice knows, whom she wonders if she has turned into (Ch II)."
+    },
+    {
+      "character": "Mary Ann",
+      "kind": "mentioned",
+      "note": "The Rabbit's housemaid, whom he mistakes Alice for (Ch IV)."
+    },
+    {
+      "character": "the farmer's terrier",
+      "kind": "mentioned",
+      "note": "The little dog near Alice's house that she describes to the Mouse (Ch II)."
+    },
+    {
+      "character": "William the Conqueror, Edwin and Morcar, Stigand, Edgar Atheling",
+      "kind": "mentioned",
+      "note": "People in the 'dry' history the Mouse recites (Ch III)."
+    },
+    {
+      "character": "Fury (the cur) and the mouse",
+      "kind": "mentioned",
+      "note": "Characters in the Mouse's tale (Ch III)."
+    },
+    {
+      "character": "Father William and his son",
+      "kind": "mentioned",
+      "note": "Characters in the poem Alice recites to the Caterpillar (Ch V)."
+    },
+    {
+      "character": "Time",
+      "kind": "mentioned",
+      "note": "Who the Hatter says he has quarrelled with (Ch VII)."
+    },
+    {
+      "character": "Elsie, Lacie, and Tillie",
+      "kind": "mentioned",
+      "note": "The three sisters in the Dormouse's story (Ch VII)."
+    },
+    {
+      "character": "the Tortoise (old Turtle master), the conger-eel Drawling-master, the Classics master (old crab)",
+      "kind": "mentioned",
+      "note": "The Mock Turtle's schoolmasters (Ch IX)."
+    },
+    {
+      "character": "the whiting, the snail, and the porpoise",
+      "kind": "mentioned",
+      "note": "Characters in the Lobster Quadrille song (Ch X)."
+    },
+    {
+      "character": "the Lobster; the Owl and the Panther",
+      "kind": "mentioned",
+      "note": "Characters in the poems Alice recites to the Gryphon (Ch X)."
+    },
+    {
+      "character": "the White Rabbit (Ch I)",
+      "kind": "present_no_interaction",
+      "note": "In Ch I Alice only sees the Rabbit and follows it; they first interact in Ch II."
+    },
+    {
+      "character": "the Fish-Footman",
+      "kind": "present_no_interaction",
+      "note": "Alice only watches him hand over the invitation; he never speaks to her (Ch VI)."
+    },
+    {
+      "character": "the old Crab and the young Crab",
+      "kind": "present_no_interaction",
+      "note": "They talk to each other at the Caucus-race, not to Alice (Ch III)."
+    },
+    {
+      "character": "the Knave of Hearts",
+      "kind": "present_no_interaction",
+      "note": "In the procession (Ch VIII) and on trial (Ch XI–XII), but never speaks to Alice."
+    },
+    {
+      "character": "the soldiers, courtiers and royal children",
+      "kind": "present_no_interaction",
+      "note": "Part of the procession and croquet game (Ch VIII–IX); they don't talk to Alice directly."
+    },
+    {
+      "character": "the two guinea-pigs (at the trial)",
+      "kind": "present_no_interaction",
+      "note": "They cheer and get suppressed in court (Ch XI); Alice only thinks about it."
+    },
+    {
+      "character": "the Hatter, the March Hare and the cook (at the trial)",
+      "kind": "present_no_interaction",
+      "note": "Witnesses in Ch XI who don't speak to Alice; the Dormouse does, and is listed as an encounter."
+    },
+    {
+      "character": "the King of Hearts (Ch IX) and the Queen and King (Ch XI)",
+      "kind": "present_no_interaction",
+      "note": "In Ch IX the King pardons 'the company generally', and in Ch XI the royals run the trial, but neither speaks to Alice in those chapters."
+    }
+  ],
+  "tally": {
+    "friendly": 9,
+    "hostile": 16,
+    "mixed": 11,
+    "neutral": 7,
+    "total": 43
+  },
+  "verdict": "Alice is more likely to be at odds with the people and creatures she meets than to befriend them: 16 of 43 encounters are hostile and only 9 are friendly (11 mixed, 7 neutral), so 27 of 43 involve real friction. A good answer should add some nuance. Her clearest friends are the Cheshire Cat (who she calls 'a friend of mine'), the Dodo, the puppy, the baby, the gardeners she saves, and later the Mock Turtle and Gryphon. Some relationships change: the Duchess goes from savage to affectionate, the Mock Turtle and Gryphon go from mixed to friendly, and the White Rabbit goes from hostile to friendly. Alice is usually polite and quick to apologise, and many quarrels start from the creatures being touchy or from her own blunders (such as talking about Dinah), not from real malice. The threats are mostly bluster ('they never executes nobody'). By the end she has grown bold enough to openly defy the King, the Queen and the whole court."
+}

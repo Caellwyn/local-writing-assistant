@@ -41,6 +41,23 @@ def _nvidia() -> dict | None:
     return max(gpus, key=lambda g: g["vram_gb"]) if gpus else None
 
 
+def gpu_clocks() -> dict | None:
+    """Current NVIDIA core clock, its maximum, power draw and utilization (for benchmarks: a laptop
+    GPU can be power-capped far below its normal clock, which makes timings meaningless)."""
+    exe = shutil.which("nvidia-smi")
+    if not exe:
+        return None
+    try:
+        out = subprocess.run(
+            [exe, "--query-gpu=clocks.sm,clocks.max.sm,power.draw,utilization.gpu", "--format=csv,noheader,nounits"],
+            capture_output=True, text=True, timeout=5, creationflags=_NO_WINDOW,
+        ).stdout
+        sm, max_sm, watts, util = (float(x) for x in out.strip().splitlines()[0].split(","))
+    except (OSError, subprocess.SubprocessError, ValueError, IndexError):
+        return None
+    return {"sm_mhz": sm, "max_sm_mhz": max_sm, "watts": watts, "util": util}
+
+
 def _is_discrete_amd(name: str) -> bool:
     # Integrated Ryzen graphics report shared system RAM; skip them.
     n = name.upper()

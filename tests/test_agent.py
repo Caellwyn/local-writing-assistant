@@ -108,6 +108,55 @@ def test_old_tool_results_are_stubbed():
     assert all("activity" not in m for m in out)  # UI-only fields never reach the model
 
 
+# -- research tools ------------------------------------------------------------
+
+def test_research_tool_wiring(lib, monkeypatch):
+    import research
+
+    sid = src_id(lib)
+    fake = research.Report("facts", "When did the fog come?", answer="At dusk [E1].", found=True,
+                           evidence=[research.Evidence(1, sid, "chapter1", 1, 4, 24, "fog came in at dusk")],
+                           cited=[1], stats={"documents": 1, "seconds": 2.0})
+    seen = {}
+
+    def fake_find_facts(lib_, question, **kw):
+        seen.update(question=question, **kw)
+        return fake
+
+    monkeypatch.setattr(research, "find_facts", fake_find_facts)
+    notes = []
+    box = ToolBox(lib, must_read={sid}, research={
+        "finder_model": "small", "researcher_model": "big", "workers": 3,
+        "on_report": lambda r: notes.append(r) or "Research - fog",
+    })
+    result, label = box.call("research_library", {"query": "When did the fog come?"})  # alias for question
+    assert seen["question"] == "When did the fog come?" and seen["finder_model"] == "small" and seen["workers"] == 3
+    assert "shown to the user" in result and "Research - fog" in result
+    assert label.startswith("🔬") and "1 passage" in label
+    assert box.last_report["note"] == "Research - fog" and box.last_report["scanned"] == [sid]
+    assert sid in box.read  # documents the pipeline read count as read for later drafts
+    tool_msg = {"role": "tool", "tool_name": "research_library", "content": result, "report": box.last_report}
+    assert sid in agent.previously_read([tool_msg])
+
+
+def test_research_tool_scope_by_title(lib, monkeypatch):
+    import research
+
+    seen = {}
+    monkeypatch.setattr(research, "find_facts",
+                        lambda lib_, q, **kw: seen.update(kw) or research.Report("facts", q, stats={}))
+    box = ToolBox(lib, research={"finder_model": "m", "researcher_model": "m"})
+    box.call("research_library", {"question": "q", "documents": "chapter1"})
+    assert seen["doc_ids"] == [src_id(lib)]
+    result, _ = box.call("research_library", {"question": "q", "documents": "no-such-doc"})
+    assert result.startswith("Error")
+
+
+def test_research_unavailable_without_context(lib):
+    result, _ = ToolBox(lib).call("research_library", {"question": "q"})
+    assert result.startswith("Error") and "research" in result
+
+
 # -- system prompt handling ---------------------------------------------------
 
 def test_with_system_native():

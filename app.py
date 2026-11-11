@@ -14,9 +14,11 @@ library lives wherever the user points it (default ~/Ollama Library).
 
 from __future__ import annotations
 
+import html
 import json
 import logging
 import os
+import re
 import shutil
 import subprocess
 import threading
@@ -34,6 +36,7 @@ from markdown_it import MarkdownIt
 import agent
 import hardware
 import models
+import research
 import settings
 from library import Library, LibraryError, clean_title, onedrive_warning
 
@@ -54,6 +57,39 @@ md = MarkdownIt("commonmark", {"html": False, "breaks": True}).enable(["table", 
 
 def render(text: str) -> str:
     return md.render(text or "")
+
+
+_CITE = re.compile(r"\[E(\d+)\]")
+
+
+def render_report(r: dict) -> dict:
+    """A research report (research.Report.to_dict()) prepared for the UI card."""
+    answer_html = _CITE.sub(r'<a href="#" class="cite" data-n="\1">[E\1]</a>', render(r.get("answer", "")))
+    s = r.get("stats", {})
+    bits = [f"{s.get('documents', 0)} document(s)"]
+    if (s.get("routed") or s.get("strategy")) == "rag-loop":  # answered by retrieval: no finder read anything
+        n = s.get("scans", 0)
+        bits.append(f"{n} retrieval search{'es' if n != 1 else ''}")
+    elif s.get("chunks"):
+        bits.append(f"{s['chunks']} passages read")
+    if s.get("cache_hits"):
+        bits.append(f"{s['cache_hits']} from cache")
+    bits.append(f"{s.get('seconds', 0)} s")
+    if s.get("finder_model"):
+        same = s["finder_model"] == s.get("researcher_model")
+        bits.append(f"model {s['finder_model']}" if same else
+                    f"finder {s['finder_model']}, researcher {s.get('researcher_model')}")
+    return {
+        "kind": r.get("kind"),
+        "question": r.get("question", ""),
+        "status": r.get("status"),
+        "found": r.get("found"),
+        "answer_html": answer_html,
+        "evidence": [{**e, "cited": e["n"] in r.get("cited", [])} for e in r.get("evidence", [])],
+        "flags": r.get("flags", []),
+        "stats": " · ".join(bits),
+        "note": r.get("note"),
+    }
 
 
 def now_iso() -> str:
@@ -184,6 +220,8 @@ class Api:
                 out.append({"role": "user", "content": m["content"]})
             elif m["role"] == "tool":
                 out.append({"role": "activity", "content": m.get("activity") or m.get("tool_name", "tool")})
+                if m.get("report"):
+                    out.append({"role": "report", "report": render_report(m["report"])})
             elif m["role"] == "assistant" and m.get("content"):
                 out.append({"role": "assistant", "content": m["content"], "html": render(m["content"]), "index": i})
         return {
@@ -233,8 +271,8 @@ class Api:
                 "size_gb": size,
                 "installed": tag in have,
                 "recommended": False,
-                # same rule of thumb as the catalog: weights + ~1.2 GB context/buffers
-                "fits": size is None or size + 1.2 <= models.budget_gb(vram),
+                # weights + context cache for this model's real architecture
+                "fits": size is None or models.installed_fit_gb(tag, size) <= models.budget_gb(vram),
                 "current": tag == self._model,
                 "tools": models.supports_tools(tag) if tag in have else None,
                 "custom": True,
@@ -412,13 +450,27 @@ class Api:
         if self._lib:
             self._lib.open_folder()
 
-    def view_document(self, doc_id: str) -> dict:
+    def view_document(self, doc_id: str, start: int | None = None, end: int | None = None) -> dict:
+        """Document for the viewer; with start/end, that passage is highlighted (a citation)."""
         try:
             doc, text = self._lib.read_all(doc_id)
         except (LibraryError, OSError, AttributeError) as e:
             return {"error": str(e)}
         is_md = doc.path.suffix.lower() == ".md"
-        return {"id": doc.id, "title": doc.title, "kind": doc.kind, "text": text, "html": render(text) if is_md else None}
+        out = {"id": doc.id, "title": doc.title, "kind": doc.kind, "text": text,
+               "html": render(text) if is_md else None, "highlight": False}
+        try:
+            s, e = int(start), int(end)
+        except (TypeError, ValueError):
+            return out
+        if 0 <= s < e <= len(text):
+            # Private-use characters mark the passage; they survive escaping/Markdown
+            # and are swapped for <mark> afterwards, so no model text becomes HTML.
+            marked = text[:s] + "" + text[s:e] + "" + text[e:]
+            body = render(marked) if is_md else f'<div class="plain">{html.escape(marked)}</div>'
+            out["html"] = body.replace("", '<mark id="hl">', 1).replace("", "</mark>", 1)
+            out["highlight"] = True
+        return out
 
     def open_document(self, doc_id: str) -> dict:
         try:
@@ -563,6 +615,7 @@ class Api:
                     self._lib, thread["messages"], model, self._num_ctx, on_text, on_activity, self._stop.is_set,
                     instructions=thread.get("instructions", ""),
                     system_supported=models.template_info(model)["system"],
+                    research=self._research_ctx(model),
                 )
             else:
                 status = self._plain_chat(thread, model, on_text)
@@ -588,6 +641,73 @@ class Api:
         }
         self._busy = False
         self._emit("onDone", payload)
+
+    def _research_ctx(self, model: str) -> dict:
+        """Settings and callbacks for the research tools (see agent.ToolBox)."""
+        have = models.installed()
+
+        def pick(key: str) -> str:
+            chosen = self._cfg.get(key)
+            if chosen and chosen in have:
+                return chosen
+            if key == "finder_model" and research.DEFAULT_FINDER in have:
+                return research.DEFAULT_FINDER
+            if key == "researcher_model" and research.DEFAULT_RESEARCHER in have:
+                return research.DEFAULT_RESEARCHER
+            return model  # fall back to the chat model
+
+        search = research.app_search_options(self._cfg.get("research_strategy"), have)
+
+        def on_report(report) -> str | None:
+            note = None
+            retrieved = (report.stats.get("routed") or report.stats.get("strategy")) == "rag-loop"
+            if search["flag"] and retrieved and search["flag"] not in report.flags:
+                report.flags.append(search["flag"])
+            if report.status == "done" and (report.evidence or report.kind == "summary"):
+                try:
+                    note = research.save_note(self._lib, report).title  # app action, not the model's
+                except LibraryError as e:
+                    log.warning("research note not saved: %s", e)
+            self._emit("onResearch", render_report({**report.to_dict(), "note": note}))
+            return note
+
+        return {
+            "finder_model": pick("finder_model"),
+            "researcher_model": pick("researcher_model"),
+            "workers": self._cfg.get("research_workers") or models.server_parallel(),
+            "think": bool(self._cfg.get("research_thinking")),
+            "strategy": search["strategy"],  # rag and hybrid are benchmark controls only
+            "rag_mode": search["rag_mode"],  # None = the strategy's default; "keyword" without the embedder
+            "deep": bool(self._cfg.get("deep_research")),
+            "on_progress": lambda text: self._emit("onProgress", text),
+            "on_report": on_report,
+        }
+
+    def research_settings(self) -> dict:
+        have = sorted(models.installed())
+        return {
+            "finder_model": self._cfg.get("finder_model"),
+            "researcher_model": self._cfg.get("researcher_model"),
+            "workers": self._cfg.get("research_workers") or models.server_parallel(),
+            "server_parallel": models.server_parallel(),
+            "default_finder": research.DEFAULT_FINDER if research.DEFAULT_FINDER in have else None,
+            "default_researcher": research.DEFAULT_RESEARCHER if research.DEFAULT_RESEARCHER in have else None,
+            "installed": have,
+        }
+
+    def set_research_settings(self, finder: str | None, researcher: str | None, workers: int | None) -> dict:
+        have = models.installed()
+        for m in (finder, researcher):
+            if m and m not in have:
+                return {"error": f"{m} isn't downloaded."}
+        self._cfg["finder_model"] = finder or None
+        self._cfg["researcher_model"] = researcher or None
+        try:
+            self._cfg["research_workers"] = max(1, min(int(workers), 16)) if workers else None
+        except (TypeError, ValueError):
+            self._cfg["research_workers"] = None
+        settings.save(self._cfg)
+        return self.research_settings()
 
     def _plain_chat(self, thread: dict, model: str, on_text) -> str:
         reply: list[str] = []
