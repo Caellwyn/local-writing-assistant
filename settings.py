@@ -14,6 +14,7 @@ DEFAULTS = {
     "num_ctx": 8192,
     "library_path": str(Path.home() / "Ollama Library"),
     "tools_default": True,  # library tools on for new chats
+    "chat_thinking": False,  # let a thinking-capable chat model reason first (slower; shown collapsed)
     "custom_models": [],  # Hugging Face models the user added (hf.co/user/repo:quant)
     # Research agents (research.py). None = use the current chat model: one model for every role
     # means no swaps, which benchmarked fastest (evals/results.md).

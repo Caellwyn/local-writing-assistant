@@ -217,7 +217,7 @@ def test_research_runs_on_the_research_server_and_frees_it_after(lib, monkeypatc
     with pytest.raises(RuntimeError):  # the app reports it; the tool doesn't swallow it
         box.call("research_library", {"question": "q"})
     assert calls == ["prepare", "finish"]
-    assert seen["workers"] == 4 and seen["client"]._client._client.base_url.port == 5555
+    assert seen["workers"] == 4 and seen["client"]._parallel._client.base_url.port == 5555  # the finders' server
 
 
 def test_research_without_a_research_server_uses_the_main_ollama(lib, monkeypatch):

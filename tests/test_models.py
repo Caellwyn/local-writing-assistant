@@ -167,10 +167,17 @@ def test_unload_used_is_quiet_when_nothing_to_do(monkeypatch):
     assert models.unload_used() == []  # Ollama isn't running
 
 
-@pytest.mark.parametrize("tag,expected_gb", [("qwen3.5:4b", 3.9), ("qwen3.5:9b", 7.0)])
-def test_qwen35_in_catalog_with_reasoning_off(monkeypatch, tag, expected_gb):
-    _server(monkeypatch, 4, "q8_0")
-    m = models.by_tag(tag)
-    assert m and models.chat_options(tag) == {"think": False}  # thinking-capable: reasoning off for chat
-    # hybrid cache (every 4th layer): estimate matches `ollama ps` on the dev machine
-    assert models.model_fit_gb(m) == pytest.approx(expected_gb, abs=0.15)
+@pytest.mark.parametrize("tag,parallel,fits_8gb", [
+    # measured on the 8 GB dev machine (RTX 4070 Laptop), 8K context, q8_0 cache
+    ("qwen3.5:9b", 1, True), ("qwen3.5:9b", 4, False),  # 100% GPU / 79% GPU
+    ("qwen3:8b", 1, True), ("qwen3:8b", 4, False),  # 100% GPU / 76% GPU
+    ("qwen3.5:4b", 4, True), ("qwen3:4b-instruct", 4, True),
+])
+def test_fits_matches_measured_loads(monkeypatch, tag, parallel, fits_8gb):
+    _server(monkeypatch, parallel, "q8_0")
+    assert models.fits(models.by_tag(tag), 8.0) is fits_8gb
+
+
+@pytest.mark.parametrize("tag", ["qwen3.5:4b", "qwen3.5:9b"])
+def test_qwen35_in_catalog_with_reasoning_off(tag):
+    assert models.by_tag(tag) and models.chat_options(tag) == {"think": False}  # reasoning off for chat

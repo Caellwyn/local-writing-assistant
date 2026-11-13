@@ -37,7 +37,7 @@ CATALOG: list[dict] = [
         # Qwen3.5 is a hybrid: only every 4th layer keeps a context cache (8 x 4 heads x 512).
         # Reasoning is switched off for chat (thinking=True -> think=False), like Qwen3 8B/14B.
         "tag": "qwen3.5:4b", "label": "Qwen3.5 4B", "size_gb": 3.3, "kv_elems": 8 * 4 * 512,
-        "fit_gb": 4.0, "thinking": True, "license": "Apache 2.0",
+        "vision_gb": 0.68, "fit_gb": 4.0, "thinking": True, "license": "Apache 2.0",
         "blurb": "Newer small Qwen with a small context cache. Not yet tested with the library tools.",
     },
     {
@@ -52,8 +52,8 @@ CATALOG: list[dict] = [
     },
     {
         "tag": "qwen3.5:9b", "label": "Qwen3.5 9B", "size_gb": 6.6, "kv_elems": 8 * 4 * 512,
-        "fit_gb": 7.2, "thinking": True, "license": "Apache 2.0",
-        "blurb": "Strong writer and the default research model. Runs partly on the CPU with 8 GB.",
+        "vision_gb": 0.92, "fit_gb": 7.2, "thinking": True, "license": "Apache 2.0",
+        "blurb": "Strong writer and the default research model. Fits 8 GB with Ollama's default 1 slot.",
     },
     {
         # Gemma uses sliding-window attention on most layers; its exact cache
@@ -97,28 +97,45 @@ def _full_tag(tag: str) -> str:
     return tag if ":" in tag.rsplit("/", 1)[-1] else f"{tag}:latest"
 
 
-def unload_used(timeout: float = 5.0) -> list[str]:
-    """Ask Ollama to unload every model this app used that is still loaded (keep_alive=0).
-    Models loaded by other programs are left alone. Returns the tags unloaded."""
-    with _used_lock:
-        used = {_full_tag(t): t for t in _used}
-    if not used:
-        return []
-    client = ollama.Client(timeout=timeout)
+def unload(host: str | None = None, *, only_used: bool = True, gpu_only: bool = False,
+           timeout: float = 5.0, tags: list[str] | None = None) -> list[str]:
+    """Ask an Ollama server (default: the user's) to unload loaded models (keep_alive=0).
+
+    only_used: just the models this app used, never another program's (False for the app's private
+    research server, where every model is the app's). gpu_only: keep models running on the CPU (the
+    embedder), which don't compete for GPU memory. tags: only these models. Only loaded models are asked: an unload request
+    for one that isn't loaded would load it first. Returns the tags unloaded."""
+    if only_used:
+        with _used_lock:
+            used = {_full_tag(t): t for t in _used}
+        if not used:
+            return []
+    client = ollama.Client(host=host, timeout=timeout) if host else ollama.Client(timeout=timeout)
     try:
-        loaded = {m.model for m in client.ps().models}
+        loaded = client.ps().models
     except Exception:
-        return []  # Ollama isn't running: nothing to free
+        return []  # the server isn't running: nothing to free
     freed = []
-    for full, tag in used.items():
-        if full not in loaded:
-            continue  # already gone; an unload request for it would load it first
+    wanted = {_full_tag(t) for t in tags} if tags else None
+    for m in loaded:
+        if wanted is not None and m.model not in wanted:
+            continue
+        if only_used and m.model not in used:
+            continue
+        if gpu_only and not getattr(m, "size_vram", 0):
+            continue
+        tag = used[m.model] if only_used else m.model
         try:
             client.generate(model=tag, keep_alive=0)
             freed.append(tag)
         except Exception:
             pass
     return freed
+
+
+def unload_used(timeout: float = 5.0) -> list[str]:
+    """Unload every model this app used from the user's Ollama (when the app closes)."""
+    return unload(timeout=timeout)
 
 
 def by_tag(tag: str) -> dict | None:
@@ -202,8 +219,13 @@ def estimate_fit_gb(
 
 
 def model_fit_gb(model: dict, num_ctx: int = DEFAULT_CTX) -> float:
-    """Estimated memory for a catalog entry (or a downloaded model's entry)."""
-    weights = model["size_gb"] * 1e9 / 1024**3  # download sizes are decimal GB
+    """Estimated memory for a catalog entry (or a downloaded model's entry).
+
+    The image encoder of a vision model (vision_gb, part of the download) isn't counted: Ollama leaves it
+    out when it decides placement (`ollama ps` showed Qwen3.5 9B at 5.24 GiB with it loaded), and the
+    measured loads agree. On the 8 GB dev machine, at 8K and q8_0: Qwen3.5 9B ran 100% on the GPU with
+    1 slot and 79% with 4; Qwen3 8B 100% with 1 and 76% with 4; Qwen3.5 4B 100% with 4."""
+    weights = (model["size_gb"] - model.get("vision_gb", 0)) * 1e9 / 1024**3  # download sizes: decimal GB
     kv = model.get("kv_elems")
     if kv is None and model.get("installed"):
         kv = _installed_kv_elems(model["tag"])
@@ -238,24 +260,35 @@ def recommend(vram_gb: float) -> str:
     return FALLBACK
 
 
-def chat_options(tag: str) -> dict:
-    """Extra ollama.chat() kwargs for a model's reasoning mode.
-
-    * Hybrid Qwen3 (8b/14b, marked thinking=True): think=False turns
-      reasoning off, which is much faster.
-    * Other models that report a 'thinking' capability (e.g. thinking-only
-      builds): think=True, so the reasoning arrives in its own field and the
-      app can hide it instead of it leaking into the reply.
-    * Everything else: no think argument at all.
-    """
+def can_think(tag: str) -> bool:
+    """Whether a model can reason before it answers (catalog flag, else Ollama's 'thinking' capability)."""
     m = by_tag(tag)
     if m:
-        return {"think": False} if m["thinking"] else {}
+        return bool(m["thinking"])
     try:
-        caps = ollama.show(tag).capabilities or []
+        return "thinking" in capabilities(tag)
     except Exception:
+        return False
+
+
+def thinking_only(tag: str) -> bool:
+    """Builds that always reason (e.g. qwen3:4b-thinking-2507): asking them not to leaks the reasoning
+    into the reply instead."""
+    return "thinking" in tag.lower() and can_think(tag)
+
+
+def chat_options(tag: str, think: bool = False) -> dict:
+    """Extra ollama.chat() kwargs for a model's reasoning mode.
+
+    * Models that can reason: think=<the user's Thinking setting>. Off is much faster: the DavidAU
+      Qwen3.5 9B took 16.7 s to its first visible word with reasoning on, 0.1 s with it off. With it on,
+      the reasoning arrives in its own field, which the app shows collapsed above the reply.
+    * Thinking-only builds: always think=True, so their reasoning stays out of the reply.
+    * Everything else: no think argument at all.
+    """
+    if not can_think(tag):
         return {}
-    return {"think": True} if "thinking" in caps else {}
+    return {"think": True if thinking_only(tag) else bool(think)}
 
 
 def _with_aliases(name: str) -> list[str]:
@@ -326,6 +359,7 @@ def installed_sizes() -> dict[str, float]:
         return {
             alias: round((m.size or 0) / 1024**3, 1)
             for m in ollama.list().models
+            if not m.model.startswith("text-only/")  # the app's own text-only copies (runtime.py)
             for alias in _with_aliases(m.model)
         }
     except Exception:

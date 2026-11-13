@@ -35,6 +35,7 @@ from pydantic import BaseModel, ValidationError
 
 import library
 import models
+import runtime
 from library import Library, LibraryError, safe_path
 
 CHUNK_WORDS = 1500
@@ -527,6 +528,11 @@ CALL_TIMEOUT = 300  # seconds; a backstop if a request still hangs
 # Reasoning is allowed only for the researcher's few, high-stakes calls. Finders and summary maps run
 # once per chunk, where thinking would multiply the cost (their time is mostly output tokens already).
 THINK_ROLES = {"brief", "plan", "rewrite", "synthesis", "reduce", "combine"}
+# The only roles called in parallel (_fan_out): they run on the app's 4-slot research server when there
+# is one (research_server.py). Every other role is sequential, so it runs on the user's own 1-slot
+# Ollama, where bigger researchers still fit on an 8 GB GPU (on the dev machine, Qwen3 8B: 43 tokens/s
+# with 1 slot vs 22 with 4; the DavidAU Qwen3.5 9B text-only copy: 34 vs 19).
+PARALLEL_ROLES = {"finder", "map"}
 EMBED_BATCH = 64  # texts per embedding request
 # The embedding model runs on the CPU: on an 8 GB GPU, loading it would evict (or push onto the CPU)
 # the researcher model, which costs far more than embedding a question on the CPU (~0.1 s).
@@ -537,10 +543,17 @@ THINK_BUDGET = 4096  # extra output tokens for the reasoning (Ollama counts it a
 class ModelClient:
     """Structured-output calls to Ollama, with per-call statistics."""
 
-    def __init__(self, host: str | None = None, num_ctx: int = NUM_CTX, think: bool = False) -> None:
+    def __init__(self, host: str | None = None, num_ctx: int = NUM_CTX, think: bool = False,
+                 parallel_host: str | None = None) -> None:
         # a 9B partly on the CPU reasons at ~13 tokens/s: a full reasoning budget takes ~7 minutes
         timeout = CALL_TIMEOUT * (3 if think else 1)
+        self._host = host
         self._client = ollama.Client(host=host, timeout=timeout) if host else ollama.Client(timeout=timeout)
+        # PARALLEL_ROLES and embeddings go here (None: everything on _client)
+        self._parallel_host = parallel_host
+        self._parallel = ollama.Client(host=parallel_host, timeout=timeout) if parallel_host else None
+        self._gpu_server: str | None = None  # "main" or "parallel": whose models hold the GPU
+        self._switch = threading.Lock()
         self.num_ctx = num_ctx
         self.think = think  # reasoning on for the researcher's calls (THINK_ROLES)
         self.stats: list[CallStat] = []
@@ -556,6 +569,24 @@ class ModelClient:
             return "thinking" in models.capabilities(model)
         except Exception:
             return False
+
+    def _server(self, role: str) -> str:
+        return "parallel" if self._parallel is not None and role in PARALLEL_ROLES else "main"
+
+    def _use_gpu(self, server: str) -> None:
+        """Before a call that needs the GPU on `server`: if the other server's models hold it, unload
+        them first. Two Ollama servers don't know about each other's memory, so without this the second
+        model would spill onto the CPU. (One server swaps models by itself; this is the same swap.)"""
+        if self._parallel is None:
+            return
+        with self._switch:
+            if self._gpu_server == server:
+                return
+            if server == "parallel":  # free the user's Ollama, but only of this app's models
+                models.unload(self._host, gpu_only=True)
+            else:
+                models.unload(self._parallel_host, only_used=False, gpu_only=True)
+            self._gpu_server = server
 
     def _options(self, role: str, model: str) -> dict:
         if self.thinks(role, model):
@@ -585,20 +616,28 @@ class ModelClient:
         system = f"{system}\nRespond only with JSON matching this schema: {json.dumps(schema.model_json_schema())}"
         opts = self._options(role, model)
         cap = MAX_TOKENS.get(role, 1024) + (THINK_BUDGET if opts.get("think") else 0)
-        models.note_used(model)
+        server = self._server(role)
+        # text-only copy; all layers on the GPU if they fit (only on the user's 1-slot Ollama)
+        run, placement = runtime.resolve(model, num_ctx or self.num_ctx, force_ok=server == "main")
+        models.note_used(run)
+        self._use_gpu(server)
+        client = self._parallel if server == "parallel" else self._client
         for attempt in range(2):
             t = time.time()
-            r = self._client.chat(
-                model=model,
+            r = client.chat(
+                model=run,
                 messages=self._messages(model, system, user),
                 format=schema.model_json_schema(),
                 options={
                     "num_ctx": num_ctx or self.num_ctx,
                     "num_predict": cap,
                     "temperature": temperature if attempt == 0 else 0.3,
+                    **placement,
                 },
                 **opts,
             )
+            if not runtime.confirm(run, placement):  # forcing didn't fit: Ollama's placement from now on
+                run, placement = runtime.resolve(model, num_ctx or self.num_ctx, force_ok=False)
             stat = CallStat(
                 role, model, time.time() - t,
                 r.prompt_eval_count or 0, r.eval_count or 0, (r.load_duration or 0) / 1e9, started=t,
@@ -623,9 +662,12 @@ class ModelClient:
         """Embedding vectors for texts, in order (the RAG control, retrieval.py)."""
         out: list[list[float]] = []
         models.note_used(model)
+        client = self._parallel or self._client  # next to the finder; on the CPU, so no GPU swap
+        if self.embed_gpu:
+            self._use_gpu("parallel" if self._parallel is not None else "main")
         for i in range(0, len(texts), EMBED_BATCH):
             t = time.time()
-            r = self._client.embed(model=model, input=texts[i:i + EMBED_BATCH],
+            r = client.embed(model=model, input=texts[i:i + EMBED_BATCH],
                                    options={} if self.embed_gpu else EMBED_OPTIONS)
             stat = CallStat("embed", model, time.time() - t, r.prompt_eval_count or 0, 0,
                             (r.load_duration or 0) / 1e9, started=t)

@@ -187,15 +187,7 @@ class ResearchServer:
         """Free every model on the research server (it's private, so they're all the app's)."""
         if not self.running:
             return []
-        client = ollama.Client(host=self.host, timeout=timeout)
-        freed = []
-        try:
-            for m in client.ps().models:
-                client.generate(model=m.model, keep_alive=0)
-                freed.append(m.model)
-        except Exception as e:
-            log.warning("research server: unload failed: %s", e)
-        return freed
+        return models.unload(self.host, only_used=False, timeout=timeout)
 
     def stop(self) -> None:
         with self._lock:

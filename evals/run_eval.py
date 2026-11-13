@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import re
 import shutil
 import statistics
@@ -105,14 +104,13 @@ SERVER_HOST: str | None = None  # the private research server the run uses (None
 
 
 def unload_all() -> None:
-    client = ollama.Client(host=SERVER_HOST) if SERVER_HOST else ollama.Client()
-    for m in client.ps().models:
-        client.generate(model=m.model, prompt="", keep_alive=0)
+    for host in [None] + ([SERVER_HOST] if SERVER_HOST else []):
+        models.unload(host, only_used=False)
     time.sleep(1)
 
 
 def gpu_split(model: str) -> str:
-    f = hardware.fit_check(model, SERVER_HOST)
+    f = hardware.fit_check(model) or (hardware.fit_check(model, SERVER_HOST) if SERVER_HOST else None)
     return f"{f['gpu_pct']}% GPU" if f else "n/a"
 
 
@@ -587,7 +585,7 @@ def run_config(lib, questions, needles, finder, researcher, chunk_words, workers
     sampler = ClockSampler().__enter__()
     for q in questions:
         for attempt in range(2):  # a question the computer slept through is run again: its time is meaningless
-            client = research.ModelClient(think=think)
+            client = research.ModelClient(think=think, parallel_host=SERVER_HOST)
             with SleepWatch() as watch:
                 t = time.time()
                 report = research.find_facts(lib, q["question"], finder_model=finder, researcher_model=researcher,
@@ -787,7 +785,7 @@ def build_rag_index(lib: Library, gpu: bool = False, window: int = 0) -> float:
     loaded yet; the questions' own embeddings stay on the CPU). Returns seconds."""
     import retrieval
 
-    client = research.ModelClient()
+    client = research.ModelClient(parallel_host=SERVER_HOST)
     client.embed_gpu = gpu
     t = time.time()
     for d in research._scope(lib, None):
@@ -1315,8 +1313,10 @@ def main() -> int:
     def save(configs: list[dict], partial: bool = True) -> None:
         result = {"round": args.round, "configs": configs, "partial": partial,
                   "when": datetime.now().strftime("%Y-%m-%d %H:%M"), "started": started,
-                  "settings": (f"workers {args.workers}, OLLAMA_NUM_PARALLEL {models.server_parallel()}, "
-                               f"KV cache {models.kv_cache_type()}")}
+                  "settings": (f"workers {args.workers}, "
+                               + (f"finders on the research server ({research_server.RESEARCH_PARALLEL} slots, q8_0), "
+                                  if SERVER_HOST else "")
+                               + f"OLLAMA_NUM_PARALLEL {models.server_parallel()}, KV cache {models.kv_cache_type()}")}
         (RUNS / f"latest-{args.round}.json").write_text(json.dumps(result, indent=2, default=str), encoding="utf-8")
         (HERE / "results.md").write_text(render(), encoding="utf-8")
         if args.round != "supervisor":
@@ -1326,14 +1326,11 @@ def main() -> int:
     server = None if args.main_ollama else research_server.ResearchServer()
     if server:  # the app's research setup: 4 slots, q8_0 cache (research_server.py)
         SERVER_HOST = server.ensure()
-        if SERVER_HOST:
-            os.environ.update({"OLLAMA_HOST": SERVER_HOST,  # read by every ollama.Client() made from here on
-                               "OLLAMA_NUM_PARALLEL": str(research_server.RESEARCH_PARALLEL),
-                               "OLLAMA_KV_CACHE_TYPE": "q8_0"})
-            print(f"Research server: {SERVER_HOST} ({research_server.RESEARCH_PARALLEL} slots)")
+        if SERVER_HOST:  # finders there, the researcher on your Ollama: as in the app
+            print(f"Research server for the finders: {SERVER_HOST} ({research_server.RESEARCH_PARALLEL} slots)")
         else:
             print(f"Research server unavailable ({server.failed}); using your Ollama")
-    args.workers = args.workers or models.server_parallel()
+    args.workers = args.workers or (research_server.RESEARCH_PARALLEL if SERVER_HOST else models.server_parallel())
 
     started = datetime.now().strftime("%Y-%m-%d %H:%M")  # one review file per run, rewritten as it goes
     fn = {"finders": round_finders, "researchers": round_researchers, "pipeline": round_pipeline,

@@ -219,6 +219,12 @@
     max-width: 85%;
   }
   .msg.assistant .bubble { word-wrap: break-word; }
+  details.thinking { margin: 0 0 6px; color: var(--muted); font-size: 13px; }
+  details.thinking summary { cursor: pointer; user-select: none; }
+  details.thinking .thinking-text {
+    white-space: pre-wrap; word-wrap: break-word; margin: 6px 0 0; padding: 8px 10px;
+    border-left: 2px solid var(--muted); max-height: 360px; overflow-y: auto;
+  }
   .bubble > :first-child { margin-top: 0; }
   .bubble > :last-child { margin-bottom: 0; }
   .bubble pre {
@@ -399,6 +405,7 @@
       </div>
       <div class="col hint">
         <label title="Let the assistant read your library and save drafts"><input type="checkbox" id="tools"> 📚 Library tools</label>
+        <label id="think-label" hidden><input type="checkbox" id="think"> 💭 Thinking</label>
         <span>Enter to send · Shift+Enter for a new line</span>
       </div>
     </div>
@@ -448,7 +455,33 @@
   const fmtGB = (n) => (n == null ? "" : `${n} GB`);
 
   // ---------- messages ----------
-  function addMessage(role, { text, html, index }) {
+  // The model's reasoning (Thinking on): collapsed above its reply, plain text.
+  function thinkingBlock(msgEl) {
+    let d = msgEl.querySelector(":scope > details.thinking");
+    if (!d) {
+      d = document.createElement("details");
+      d.className = "thinking";
+      d.innerHTML = "<summary></summary><div class=\"thinking-text\"></div>";
+      msgEl.insertBefore(d, msgEl.firstChild);
+    }
+    return d;
+  }
+  function setThinking(msgEl, text, live) {
+    const d = thinkingBlock(msgEl);
+    const box = d.querySelector(".thinking-text");
+    const atEnd = box.scrollHeight - box.scrollTop - box.clientHeight < 30;
+    box.textContent = text;
+    if (atEnd) box.scrollTop = box.scrollHeight;
+    const words = text.split(/\s+/).filter(Boolean).length;
+    d.querySelector("summary").textContent = live ? `💭 Thinking… (${words} words)` : `💭 Thought (${words} words)`;
+  }
+  function finishThinking(bubble) {
+    const msgEl = bubble && bubble.parentElement;
+    const d = msgEl && msgEl.querySelector(":scope > details.thinking");
+    if (d) setThinking(msgEl, d.querySelector(".thinking-text").textContent, false);
+  }
+
+  function addMessage(role, { text, html, index, thinking }) {
     if (role === "activity") {
       const a = document.createElement("div");
       a.className = "activity";
@@ -463,6 +496,10 @@
     if (html != null) bubble.innerHTML = html;   // markdown rendered (and escaped) in Python
     else bubble.textContent = text;
     msg.appendChild(bubble);
+    if (role === "assistant" && thinking) {
+      setThinking(msg, thinking, false);
+      if (!html) bubble.hidden = true;  // a step that only reasoned, then used a tool
+    }
     if (role === "assistant") attachSave(msg, index);
     logEl.appendChild(msg);
     return bubble;
@@ -508,7 +545,7 @@
     if (!view.messages.length) showWelcome();
     for (const m of view.messages) {
       if (m.role === "report") addReport(m.report);
-      else addMessage(m.role, { text: m.content, html: m.html, index: m.index });
+      else addMessage(m.role, { text: m.content, html: m.html, index: m.index, thinking: m.thinking });
     }
     scrollDown(true);
     refreshThreads();
@@ -605,6 +642,8 @@
     sendBtn.classList.toggle("stop", b);
     $("#model").disabled = b;
     $("#tools").disabled = b || noToolsModel;
+    const cur = models && models.models && models.models.find((m) => m.tag === models.current);
+    $("#think").disabled = b || !!(cur && cur.thinking_only);
   }
   let noToolsModel = false;
 
@@ -754,6 +793,15 @@
     toolsLabel.title = noTools
       ? `${curModel.label} wasn't trained for tool calling (its chat template has no tool support), so it can't use the library.`
       : "Let the assistant read your library and save drafts";
+    // Thinking: only for models that can reason; thinking-only builds always do.
+    const canThink = !!curModel && curModel.thinking;
+    const thinkLabel = $("#think-label");
+    thinkLabel.hidden = !canThink;
+    $("#think").checked = canThink && (curModel.thinking_only || models.thinking_on);
+    $("#think").disabled = busy || (canThink && curModel.thinking_only);
+    thinkLabel.title = canThink && curModel.thinking_only
+      ? `${curModel.label} always reasons before it answers.`
+      : "Let the model reason before it answers: often better on hard questions, but slower (nothing appears until it has thought). Click 💭 above a reply to read its reasoning.";
     if ($("#instr-form").classList.contains("open")) loadInstructions();
     const g = models.gpu;
     $("#meta").textContent = g.backend === "CPU" ? "No supported GPU · running on CPU" : `${g.name.replace(/^NVIDIA GeForce |^AMD /, "")} · ${g.vram_gb} GB`;
@@ -923,7 +971,9 @@
     liveBubble.classList.add("typing");
   }
   function dropEmptyLive() {
-    if (liveBubble && !liveBubble.textContent.trim()) liveBubble.parentElement.remove();
+    if (!liveBubble || liveBubble.textContent.trim()) return;
+    if (liveBubble.parentElement.querySelector(":scope > details.thinking")) liveBubble.hidden = true;
+    else liveBubble.parentElement.remove();
   }
 
   async function send() {
@@ -943,6 +993,11 @@
     refreshThreads();
   }
 
+  window.onThinking = (text) => {
+    if (!liveBubble) return;
+    setThinking(liveBubble.parentElement, text, true);
+    scrollDown(false);
+  };
   window.onChunk = (html) => {
     if (!liveBubble) return;
     liveBubble.innerHTML = html;
@@ -950,16 +1005,18 @@
   };
   window.onActivity = (label) => {
     clearProgress();
-    if (liveBubble) { liveBubble.classList.remove("typing"); dropEmptyLive(); }
+    if (liveBubble) { liveBubble.classList.remove("typing"); finishThinking(liveBubble); dropEmptyLive(); }
     addMessage("activity", { text: label });
     newLiveBubble();
     scrollDown(false);
     if (/Created|Revised/.test(label)) refreshLibrary();
   };
-  window.onDone = ({ html, index, status, fit }) => {
+  window.onDone = ({ html, index, status, fit, thinking }) => {
     clearProgress();
     if (liveBubble) {
       liveBubble.classList.remove("typing");
+      if (thinking) setThinking(liveBubble.parentElement, thinking, false);  // the full text (live updates are throttled)
+      finishThinking(liveBubble);
       if (html) {
         liveBubble.innerHTML = html;
         attachSave(liveBubble.parentElement, index);
@@ -1010,6 +1067,10 @@
   input.addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
   sendBtn.onclick = send;
   $("#new-chat").onclick = async () => { renderThread(await api.new_chat()); input.focus(); };
+  $("#think").onchange = async (e) => {
+    const r = await api.set_thinking(e.target.checked);
+    models.thinking_on = r.thinking_on;
+  };
   $("#tools").onchange = async (e) => {
     const r = await api.set_tools_enabled(e.target.checked);
     if (r.error) { banner(r.error); e.target.checked = !e.target.checked; }

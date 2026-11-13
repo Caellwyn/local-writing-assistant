@@ -58,6 +58,19 @@ def gpu_clocks() -> dict | None:
     return {"sm_mhz": sm, "max_sm_mhz": max_sm, "watts": watts, "util": util}
 
 
+def gpu_used_gb() -> float | None:
+    """GPU memory in use right now (NVIDIA), in GiB."""
+    exe = shutil.which("nvidia-smi")
+    if not exe:
+        return None
+    try:
+        out = subprocess.run([exe, "--query-gpu=memory.used", "--format=csv,noheader,nounits"],
+                             capture_output=True, text=True, timeout=5, creationflags=_NO_WINDOW).stdout
+        return round(float(out.strip().splitlines()[0]) / 1024, 2)
+    except (OSError, subprocess.SubprocessError, ValueError, IndexError):
+        return None
+
+
 def _is_discrete_amd(name: str) -> bool:
     # Integrated Ryzen graphics report shared system RAM; skip them.
     n = name.upper()

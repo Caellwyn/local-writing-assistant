@@ -38,6 +38,7 @@ import hardware
 import models
 import research
 import research_server
+import runtime
 import settings
 from library import Library, LibraryError, clean_title, onedrive_warning
 
@@ -224,8 +225,10 @@ class Api:
                 out.append({"role": "activity", "content": m.get("activity") or m.get("tool_name", "tool")})
                 if m.get("report"):
                     out.append({"role": "report", "report": render_report(m["report"])})
-            elif m["role"] == "assistant" and m.get("content"):
-                out.append({"role": "assistant", "content": m["content"], "html": render(m["content"]), "index": i})
+            elif m["role"] == "assistant" and (m.get("content") or m.get("thinking")):
+                out.append({"role": "assistant", "content": m.get("content", ""),
+                            "html": render(m["content"]) if m.get("content") else "",
+                            "index": i if m.get("content") else None, "thinking": m.get("thinking", "")})
         return {
             "id": thread["id"],
             "title": thread["title"],
@@ -285,6 +288,10 @@ class Api:
             if i["installed"]:
                 support = models.template_info(i["tag"])
                 i["system"], i["tools"] = support["system"], support["tools"]
+                # read from its weights file, as the app runs it (text-only, all layers if they fit)
+                gpu_fit = runtime.fits(i["tag"], vram, models.server_parallel(), self._num_ctx)
+                if gpu_fit is not None:
+                    i["fits"] = gpu_fit
         if not any(i["tag"] == self._model for i in items):  # e.g. forced with OLLAMA_MODEL
             items.append({
                 "tag": self._model, "label": self._model, "size_gb": sizes.get(self._model),
@@ -292,7 +299,17 @@ class Api:
                 "tools": models.supports_tools(self._model) if self._model in have else None,
                 "blurb": "Set with OLLAMA_MODEL", "license": "",
             })
-        return {"models": items, "current": self._model, "pulling": self._pulling, "gpu": self._gpu}
+        for i in items:  # the Thinking checkbox: only for models that can reason
+            i["thinking"] = bool(i["installed"]) and models.can_think(i["tag"])
+            i["thinking_only"] = i["thinking"] and models.thinking_only(i["tag"])
+        return {"models": items, "current": self._model, "pulling": self._pulling, "gpu": self._gpu,
+                "thinking_on": bool(self._cfg.get("chat_thinking"))}
+
+    def set_thinking(self, on: bool) -> dict:
+        """Thinking: let a thinking-capable chat model reason before it answers (app-wide)."""
+        self._cfg["chat_thinking"] = bool(on)
+        settings.save(self._cfg)
+        return {"thinking_on": self._cfg["chat_thinking"]}
 
     def model_support(self) -> dict:
         """What the current model's chat template supports: {'system': bool, 'tools': bool}."""
@@ -340,6 +357,7 @@ class Api:
         try:
             if tag in models.installed():
                 models.delete(tag)
+                runtime.delete_copy(tag)
         except Exception as e:
             log.warning("delete %s failed: %s", tag, e)
         self._cfg["custom_models"].remove(tag)
@@ -369,12 +387,17 @@ class Api:
             if model not in models.installed():
                 self._emit("onFit", {"model": model, "label": "not downloaded"})
                 return
+            run = model
             try:
-                models.note_used(model)
-                ollama.generate(model=model, prompt="", options={"num_ctx": num_ctx}, keep_alive="10m")
+                for _ in range(2):  # a second time only if forcing all layers onto the GPU didn't work out
+                    run, extra = runtime.resolve(model, num_ctx)  # text-only copy, all layers if they fit
+                    models.note_used(run)
+                    ollama.generate(model=run, prompt="", options={"num_ctx": num_ctx, **extra}, keep_alive="10m")
+                    if runtime.confirm(run, extra):
+                        break
             except Exception as e:
                 log.warning("warm-up failed: %s", e)
-            self._emit("onFit", {"model": model, **(hardware.fit_check(model) or {"label": "loaded"})})
+            self._emit("onFit", {"model": model, **(hardware.fit_check(run) or {"label": "loaded"})})
 
         threading.Thread(target=run, daemon=True).start()
 
@@ -621,8 +644,19 @@ class Api:
                 self._emit("onChunk", render(full))
                 last_push = now
 
+        last_thought = 0.0
+
+        def on_thinking(full: str) -> None:
+            nonlocal last_thought
+            now = time.monotonic()
+            if now - last_thought > 0.1:  # plain text; the page escapes it
+                self._emit("onThinking", full)
+                last_thought = now
+
         def on_activity(label: str) -> None:
             self._emit("onActivity", label)
+
+        think = bool(self._cfg.get("chat_thinking"))
 
         try:
             if thread.get("tools") and self._lib:
@@ -631,9 +665,10 @@ class Api:
                     instructions=thread.get("instructions", ""),
                     system_supported=models.template_info(model)["system"],
                     research=self._research_ctx(model),
+                    think=think, on_thinking=on_thinking,
                 )
             else:
-                status = self._plain_chat(thread, model, on_text)
+                status = self._plain_chat(thread, model, on_text, think, on_thinking)
         except ollama.ResponseError as e:
             log.error("ollama error %s: %s", e.status_code, e.error)
             hint = f" Try downloading {model} again." if e.status_code == 404 else ""
@@ -652,7 +687,8 @@ class Api:
             "html": render(final["content"]) if final else "",
             "index": len(thread["messages"]) - 1 if final else None,
             "status": status,
-            "fit": {"model": model, **(hardware.fit_check(model) or {})},
+            "thinking": (final or {}).get("thinking", ""),
+            "fit": {"model": model, **(hardware.fit_check(runtime.running_tag(model)) or {})},
         }
         self._busy = False
         self._emit("onDone", payload)
@@ -674,13 +710,13 @@ class Api:
         search = research.app_search_options(self._cfg.get("research_strategy"), have)
 
         def prepare() -> dict:
-            """Before a research run: use the private 4-slot research server, and free the GPU for it by
-            unloading the chat model from the user's Ollama (it reloads for the reply afterwards)."""
+            """Before a research run: the private 4-slot research server for the parallel finders. The
+            researcher runs on the user's Ollama; research.ModelClient frees the GPU whenever it switches
+            servers, so a chat model that is also the researcher isn't reloaded."""
             server = self._research_server
             host = server.ensure(on_start=lambda: self._emit("onProgress", "⚙️ Starting the research server…"))
             if not host:
                 return {"host": None, "workers": self._cfg.get("research_workers") or models.server_parallel()}
-            models.unload_used()
             return {"host": host, "workers": self._cfg.get("research_workers") or research_server.RESEARCH_PARALLEL}
 
         def finish() -> None:
@@ -739,24 +775,36 @@ class Api:
         settings.save(self._cfg)
         return self.research_settings()
 
-    def _plain_chat(self, thread: dict, model: str, on_text) -> str:
+    def _plain_chat(self, thread: dict, model: str, on_text, think: bool = False, on_thinking=None) -> str:
         reply: list[str] = []
+        thought: list[str] = []
         system = thread.get("instructions", "").strip() or CHAT_PROMPT
         msgs = agent.with_system(system, agent.to_ollama(thread["messages"]), models.template_info(model)["system"])
-        models.note_used(model)
+        run, extra = runtime.resolve(model, self._num_ctx)  # text-only copy, all layers if they fit
+        models.note_used(run)
         stream = ollama.chat(
-            model=model, messages=msgs, stream=True, options={"num_ctx": self._num_ctx}, **models.chat_options(model)
+            model=run, messages=msgs, stream=True, options={"num_ctx": self._num_ctx, **extra},
+            **models.chat_options(model, think)
         )
         stopped = False
         for chunk in stream:
-            reply.append(chunk.message.content or "")
-            on_text("".join(reply))
+            if chunk.message.thinking:
+                thought.append(chunk.message.thinking)
+                if on_thinking:
+                    on_thinking("".join(thought))
+            if chunk.message.content:
+                reply.append(chunk.message.content)
+                on_text("".join(reply))
             if self._stop.is_set():
                 stopped = True
                 stream.close()
                 break
-        if "".join(reply):
-            thread["messages"].append({"role": "assistant", "content": "".join(reply)})
+        runtime.confirm(run, extra)
+        if "".join(reply) or thought:
+            message = {"role": "assistant", "content": "".join(reply)}
+            if thought:  # shown in the chat, never sent back to the model (to_ollama drops it)
+                message["thinking"] = "".join(thought).strip()
+            thread["messages"].append(message)
         return "stopped" if stopped else "done"
 
     def _fail(self, thread: dict, start_len: int, message: str) -> None:

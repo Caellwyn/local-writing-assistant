@@ -7,6 +7,7 @@ It's a learning/portfolio project. The interesting part isn't the chat window; i
 ## Features
 
 - **Streaming chat** with saved, renameable threads.
+- **💭 Thinking** (shown only for models that can reason): off by default, because the model writes nothing visible until it has finished reasoning (17 s vs 0.3 s to the first word for a 9B on an 8 GB laptop GPU). When it's on, the reasoning streams into a collapsed "💭 Thinking…" section above the reply. Click it to read the reasoning; it's saved with the chat but never sent back to the model.
 - **Document library**: import `.txt`/`.md` files; the assistant reads them and writes drafts. Every revision keeps the previous version.
 - **GPU-aware model picker**: detects your graphics card, recommends a model that fits, downloads models with a progress bar, and shows whether the loaded model runs 100% on the GPU.
 - **Hugging Face models**: add any GGUF model with `hf.co/<user>/<repo>[:<quant>]`.
@@ -62,12 +63,21 @@ ollama pull qwen3-embedding:0.6b   # retrieval; without it, retrieval falls back
 
 ### Parallelism: a private research server
 
-Ollama sets the number of parallel requests per server, when it starts, for every model it loads. Research wants 4 (the finder reads 4 chunks at once: about 3× the throughput on the RTX 4070), but each slot needs its own context cache, so 4 slots push chat models partly onto the CPU: on the dev machine Qwen3 8B ran at 23 tokens/s (76% GPU) with 4 slots and 34 tokens/s (100% GPU) with 1.
+Ollama sets the number of parallel requests per server, when it starts, for every model it loads. The finder wants 4 (it reads 4 chunks at once: about 3× the throughput on the RTX 4070), but each slot needs its own context cache, so 4 slots push bigger models partly onto the CPU. Measured on the dev machine (8 GB, 8K context, q8_0 cache):
 
-So your Ollama keeps its default of 1 slot, and the app starts a second, private Ollama server ([research_server.py](research_server.py)) the first time research runs:
+| Model (as the app runs it) | 1 slot | 4 slots |
+|---|---|---|
+| Qwen3 8B | 100% GPU, 43 tokens/s | 76% GPU, 22 tokens/s |
+| DavidAU Qwen3.5 9B "MAX" (text-only, all layers) | 100% GPU, 34 tokens/s | 79% GPU, 19 tokens/s |
+| Qwen3.5 9B (text-only) | 100% GPU, 40 tokens/s | 100% GPU, 40 tokens/s |
+
+Two runs each, alternating, GPU at full power (55 W). On a weaker power supply every speed roughly halves.
+
+Only the finder's calls run in parallel; the researcher's are one at a time. So your Ollama keeps its default of 1 slot and runs the researcher (and your chat model), and the app starts a second, private Ollama server ([research_server.py](research_server.py)) for the finder the first time research runs:
 
 - on a free local port, with `OLLAMA_NUM_PARALLEL=4`, `OLLAMA_KV_CACHE_TYPE=q8_0` and `OLLAMA_FLASH_ATTENTION=1`, reading the same downloaded models (~3–4 s to start, once per session);
-- before each run the app unloads its chat model from your Ollama, so the two servers don't compete for GPU memory; after the run it unloads the research models, and the chat model reloads for the reply;
+- two servers don't know about each other's memory, so whenever research switches between finder and researcher, it first unloads the other server's GPU models (on your Ollama, only models this app loaded). That's the same swap one server would make by itself. The embedding model runs on the CPU and stays loaded;
+- after the run the finder is unloaded; if your chat model is also the researcher, it was never unloaded;
 - it stops when the app closes. On Windows a job object ties it to the app's process, so it also ends if the app crashes.
 
 If it can't start (no `ollama` executable found, or `OLLAMA_HOST` points to another machine), research uses your Ollama with however many slots it has.
@@ -80,6 +90,19 @@ Optional, for your own Ollama: these two Windows **user** environment variables 
 | `OLLAMA_FLASH_ATTENTION` | `1` | Required for the compressed cache |
 
 When closing, the app also unloads every model it loaded from your Ollama, instead of leaving them in GPU memory until Ollama's keep-alive (5–10 minutes) runs out.
+
+### Text-only copies and GPU placement
+
+The app only works with text, but many models (Qwen3.5, most community builds of it) ship with an image encoder that Ollama loads onto the GPU every time: about 1 GiB for a 9B. The first time the app uses such a model, it makes a **text-only copy** with `ollama create`: the same weights file without the encoder, under the hidden `text-only/` namespace. The copy reuses the downloaded file, so it takes no disk space; delete the original from the app and the copy goes with it. [runtime.py](runtime.py) has the details.
+
+Ollama also keeps a safety margin when it places layers, which can leave a model that fits a couple of layers short of the GPU. The app reads each model's weights file to estimate what it really needs (weights except the input embeddings, which always stay in system memory, plus context cache and buffers). If at least 0.5 GiB would be left over, it asks Ollama for every layer (`num_gpu`). After the first load it checks the result, and if the model didn't land fully on the GPU, it reloads with Ollama's own placement. Measured on the 8 GB dev machine:
+
+| Model, 1 slot | GPU | GPU memory | Speed |
+|---|---|---|---|
+| Qwen3.5 9B as downloaded | 100% | 6.24 GiB | 40 tokens/s |
+| Qwen3.5 9B, text-only copy | 100% | 5.14 GiB | 39–40 tokens/s |
+| DavidAU Qwen3.5 9B "MAX" as downloaded | 75% | 6.19 GiB | 17 tokens/s |
+| DavidAU Qwen3.5 9B "MAX", text-only copy, all layers | 100% | 6.25 GiB | 34 tokens/s |
 
 ## Security model
 

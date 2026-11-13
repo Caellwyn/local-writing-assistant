@@ -14,6 +14,7 @@ from typing import Callable
 import ollama
 
 import models
+import runtime
 from library import Library, LibraryError
 
 MAX_STEPS = 8  # model calls per user turn
@@ -248,11 +249,12 @@ class ToolBox:
             else:
                 progress(f"🧠 {stage.capitalize()}…")
 
-        # prepare(): where to run (the app's private 4-slot research server, see research_server.py)
-        # and how many finders at once; finish(): free that server's models for the chat model.
+        # prepare(): the app's private 4-slot research server for the parallel finders, if any (see
+        # research_server.py; the researcher stays on the user's Ollama) and how many finders at once;
+        # finish(): free that server's models for the chat model.
         setup = r["prepare"]() if r.get("prepare") else {}
         think = r.get("think", False)
-        client = research.ModelClient(host=setup["host"], think=think) if setup.get("host") else None
+        client = research.ModelClient(think=think, parallel_host=setup["host"]) if setup.get("host") else None
         common = dict(finder_model=r["finder_model"], researcher_model=r["researcher_model"],
                       workers=setup.get("workers") or r.get("workers", 4), think=think, on_progress=on_progress,
                       should_stop=r.get("should_stop", lambda: False), client=client)
@@ -477,9 +479,12 @@ def run_turn(
     instructions: str = "",
     system_supported: bool = True,
     research: dict | None = None,
+    think: bool = False,
+    on_thinking: Callable[[str], None] | None = None,
 ) -> str:
     """Run one user turn. Appends assistant/tool messages to `messages` in place.
 
+    think: let a thinking-capable model reason first; on_thinking(full_reasoning_so_far) streams it.
     on_text(full_text_so_far) streams the current step's reply;
     on_activity(label) reports each tool call. Returns "done", "stopped", "max_steps",
     or "unsaved" (the user asked to save but no draft was actually written).
@@ -494,26 +499,32 @@ def run_turn(
         allow_write=bool(_WANTS_WRITE.search(last_user)),
         research=research,
     )
-    extra = models.chat_options(model)
+    extra = models.chat_options(model, think)
     wants_save = bool(_WANTS_SAVE.search(last_user))
     saved = nudged = False
 
     for _ in range(MAX_STEPS):
         content: list[str] = []
+        thought: list[str] = []
         calls: list[tuple[str, dict]] = []
         system = SYSTEM_PROMPT.replace("{library}", library_listing(lib))
         if instructions.strip():
             system += USER_INSTRUCTIONS_HEADER + instructions.strip()
-        models.note_used(model)
+        run, placement = runtime.resolve(model, num_ctx)  # text-only copy, all layers if they fit
+        models.note_used(run)
         stream = ollama.chat(
-            model=model,
+            model=run,
             messages=with_system(system, to_ollama(messages), system_supported),
             tools=TOOL_SCHEMAS,
             stream=True,
-            options={"num_ctx": num_ctx},
+            options={"num_ctx": num_ctx, **placement},
             **extra,
         )
         for chunk in stream:
+            if chunk.message.thinking:
+                thought.append(chunk.message.thinking)
+                if on_thinking:
+                    on_thinking("".join(thought))
             if chunk.message.content:
                 content.append(chunk.message.content)
                 on_text("".join(content))
@@ -534,6 +545,8 @@ def run_turn(
         assistant = {"role": "assistant", "content": text}
         if calls:
             assistant["tool_calls"] = [{"function": {"name": n, "arguments": a}} for n, a in calls]
+        if thought:  # shown in the chat, never sent back to the model (to_ollama drops it)
+            assistant["thinking"] = "".join(thought).strip()
         if text or calls:
             messages.append(assistant)
 
